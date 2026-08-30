@@ -30,6 +30,22 @@ test_that("a namespace-qualified call to a forbidden function is a violation", {
   )
 })
 
+test_that("a function spec written with ::: matches the internal call", {
+  result <- arch_check(
+    rule("no internal helpers") |>
+      modules_matching("R/ui_*.R") |>
+      must_not_call(functions = "tools:::.hidden_helper"),
+    root = fixture("pkg_layered")
+  )
+
+  expect_equal(nrow(result$violations), 1L)
+  expect_equal(result$violations$file, "R/ui_report.R")
+  expect_equal(result$violations$line, 5L)
+  expect_equal(result$violations$callee, "tools:::.hidden_helper")
+  expect_equal(result$violations$resolved_by, "namespace_internal")
+  expect_true(result$violations$internal)
+})
+
 test_that("a bare function name matches whoever owns it", {
   result <- arch_check(
     rule("no file extensions") |>

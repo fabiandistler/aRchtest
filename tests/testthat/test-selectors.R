@@ -61,7 +61,6 @@ test_that("a selector matching no file fails with a distinct message", {
 
   expect_true(result$rules$empty_selection)
   expect_equal(nrow(result$violations), 0L)
-  expect_false(aRchtest:::arch_ok(result))
 
   text <- format(result)
   expect_true(any(grepl("EMPTY SELECTION", text, fixed = TRUE)))

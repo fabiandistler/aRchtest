@@ -44,6 +44,32 @@ test_that("per-rule metadata stays attributable to its own rule", {
   expect_equal(result$selected_files[["typo"]], character())
 })
 
+test_that("duplicate rule names are rejected so findings stay attributable", {
+  expect_error(
+    arch_check(list(ui_rule(), ui_rule()), root = fixture("pkg_layered")),
+    "Rule names must be unique"
+  )
+  expect_error(
+    arch_check(list(ui_rule(), ui_rule()), root = fixture("pkg_layered")),
+    "UI must not use tools"
+  )
+})
+
+test_that("per-rule violation counts do not bleed between rules", {
+  result <- arch_check(
+    list(
+      ui_rule(),
+      rule("ui again, different name") |>
+        modules_matching("R/ui_*.R") |>
+        must_not_call(packages = "tools")
+    ),
+    root = fixture("pkg_layered")
+  )
+
+  expect_equal(result$rules$n_violations, c(4L, 4L))
+  expect_equal(nrow(result$violations), 8L)
+})
+
 test_that("coverage counts are reported for the check as a whole", {
   one <- arch_check(ui_rule(), root = fixture("pkg_layered"))
   many <- arch_check(architecture(), root = fixture("pkg_layered"))

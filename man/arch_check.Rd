@@ -7,7 +7,8 @@
 arch_check(rules, root = ".", on_ambiguous = c("report", "fail"))
 }
 \arguments{
-\item{rules}{A single \code{arch_rule} or a list of them.}
+\item{rules}{A single \code{arch_rule} or a list of them. Rule names must be
+unique, so every finding stays attributable to the rule that produced it.}
 
 \item{root}{Path to the project root to analyse. Defaults to the working
 directory. All file selection and every reported path is relative to this

@@ -30,7 +30,8 @@ arch_package_methods <- c("namespace", "namespace_internal", "export", "base")
 #' of what it saw proves little, and a degraded pass looks exactly like a clean
 #' project unless you look.
 #'
-#' @param rules A single `arch_rule` or a list of them.
+#' @param rules A single `arch_rule` or a list of them. Rule names must be
+#'   unique, so every finding stays attributable to the rule that produced it.
 #' @param root Path to the project root to analyse. Defaults to the working
 #'   directory. All file selection and every reported path is relative to this
 #'   root, so rules read the same wherever the tests run from.
@@ -93,6 +94,7 @@ arch_check <- function(rules, root = ".", on_ambiguous = c("report", "fail")) {
   }
   names(selected_files) <- rule_names
 
+  n_violations <- vapply(violations, nrow, integer(1))
   violations <- data.table::rbindlist(violations)
   ambiguous <- data.table::rbindlist(ambiguous)
 
@@ -109,12 +111,7 @@ arch_check <- function(rules, root = ".", on_ambiguous = c("report", "fail")) {
     ),
     n_files = vapply(selected_files, length, integer(1), USE.NAMES = FALSE),
     empty_selection = empty_selection,
-    n_violations = vapply(
-      rule_names,
-      function(nm) sum(violations$rule == nm),
-      integer(1),
-      USE.NAMES = FALSE
-    )
+    n_violations = n_violations
   )
 
   arch_result(
@@ -151,6 +148,19 @@ arch_as_rule_list <- function(rules) {
       call. = FALSE
     )
   }
+
+  names_used <- vapply(rules, function(r) r$name, character(1))
+  duplicated_names <- unique(names_used[duplicated(names_used)])
+  if (length(duplicated_names)) {
+    stop(
+      "Rule names must be unique so findings stay attributable; ",
+      "repeated name(s): ",
+      paste(sQuote(duplicated_names, q = FALSE), collapse = ", "),
+      ".",
+      call. = FALSE
+    )
+  }
+
   rules
 }
 
