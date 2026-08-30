@@ -7,3 +7,5 @@
 ^\.claude$
 ^\.github$
 ^\.scratch$
+^aRchtest\.Rproj$
+^\.Rproj\.user$
