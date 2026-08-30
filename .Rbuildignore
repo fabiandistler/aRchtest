@@ -3,6 +3,7 @@
 ^CONTEXT\.md$
 ^SPEC\.md$
 ^docs$
+^docs/
 ^\.claude$
 ^\.github$
 ^\.scratch$
