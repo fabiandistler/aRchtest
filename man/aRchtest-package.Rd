@@ -12,6 +12,7 @@ Declare architectural boundaries between the modules of an R project as data and
 Useful links:
 \itemize{
   \item \url{https://github.com/fabiandistler/aRchtest}
+  \item \url{https://fabiandistler.github.io/aRchtest/}
   \item Report bugs at \url{https://github.com/fabiandistler/aRchtest/issues}
 }
 

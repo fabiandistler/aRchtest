@@ -29,5 +29,5 @@ VignetteBuilder:
 Config/testthat/edition: 3
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 8.0.0
-URL: https://github.com/fabiandistler/aRchtest
+URL: https://github.com/fabiandistler/aRchtest, https://fabiandistler.github.io/aRchtest/
 BugReports: https://github.com/fabiandistler/aRchtest/issues
