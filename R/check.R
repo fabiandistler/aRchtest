@@ -1,4 +1,6 @@
-arch_resolved_methods <- c("namespace", "namespace_internal", "local", "export", "base")
+arch_resolved_methods <- c(
+  "namespace", "namespace_internal", "local", "export", "base"
+)
 arch_package_methods <- c("namespace", "namespace_internal", "export", "base")
 
 #' Check architectural rules against a project
@@ -100,7 +102,8 @@ arch_check <- function(rules, root = ".", on_ambiguous = c("report", "fail")) {
     patterns = vapply(
       rules,
       function(r) {
-        paste(vapply(r$selectors, function(s) s$pattern, character(1)), collapse = ", ")
+        patterns <- vapply(r$selectors, function(s) s$pattern, character(1))
+        paste(patterns, collapse = ", ")
       },
       character(1)
     ),
@@ -254,8 +257,12 @@ arch_evaluate_rule <- function(rule, sites, files, on_ambiguous) {
     }
   }
 
-  violations <- data.table::rbindlist(c(list(arch_empty_violations()), violations))
-  ambiguous <- data.table::rbindlist(c(list(arch_empty_ambiguous()), ambiguous))
+  violations <- data.table::rbindlist(
+    c(list(arch_empty_violations()), violations)
+  )
+  ambiguous <- data.table::rbindlist(
+    c(list(arch_empty_ambiguous()), ambiguous)
+  )
   violations <- unique(violations)
   ambiguous <- unique(ambiguous)
   if (nrow(violations)) {
@@ -306,8 +313,8 @@ arch_match_must_not_call <- function(scoped, constraint) {
     }
     if (nrow(qualified)) {
       key <- paste(scoped$owner, scoped$symbol, sep = "::")
-      violation <- violation |
-        (attributed & key %in% paste(qualified$package, qualified$symbol, sep = "::"))
+      wanted_keys <- paste(qualified$package, qualified$symbol, sep = "::")
+      violation <- violation | (attributed & key %in% wanted_keys)
       ambiguous <- ambiguous |
         (unsure & scoped$symbol %in% qualified$symbol & vapply(
           scoped$candidates,

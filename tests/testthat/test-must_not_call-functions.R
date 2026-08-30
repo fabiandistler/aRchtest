@@ -42,7 +42,7 @@ test_that("a bare function name matches whoever owns it", {
   expect_setequal(result$violations$line, c(2L, 6L, 1L))
 })
 
-test_that("a project-local function shadowing a forbidden name is not a violation", {
+test_that("a local function shadowing a forbidden name is not a violation", {
   result <- arch_check(
     rule("no title casing") |>
       modules_matching("R/ui_*.R") |>
@@ -61,7 +61,9 @@ test_that("forbidding one function leaves the rest of its package alone", {
     root = fixture("pkg_layered")
   )
 
-  expect_false(any(result$violations$callee %in% c("paste0", "toupper", "substr")))
+  expect_false(
+    any(result$violations$callee %in% c("paste0", "toupper", "substr"))
+  )
   expect_equal(nrow(result$violations), 1L)
 })
 

@@ -96,7 +96,9 @@ arch_function_definitions <- function(pd, nav) {
   def_ids <- unique(pd$parent[is_fun])
   def_ids <- def_ids[!is.na(def_ids) & def_ids > 0L]
 
-  named <- vapply(def_ids, function(d) arch_definition_name(d, nav), character(1))
+  named <- vapply(
+    def_ids, function(d) arch_definition_name(d, nav), character(1)
+  )
   names(named) <- as.character(def_ids)
 
   list(
@@ -277,7 +279,9 @@ arch_call_sites <- function(pd, nav, def_names, lines, rel_path) {
 }
 
 arch_library_calls <- function(pd, nav) {
-  rows <- which(pd$token == "SYMBOL_FUNCTION_CALL" & pd$text %in% c("library", "require"))
+  rows <- which(
+    pd$token == "SYMBOL_FUNCTION_CALL" & pd$text %in% c("library", "require")
+  )
   if (!length(rows)) {
     return(character())
   }
@@ -308,7 +312,11 @@ arch_slice_source <- function(lines, line1, col1, line2, col2) {
     text <- substr(lines[line1], col1, col2)
   } else {
     first <- substring(lines[line1], col1)
-    middle <- if (line2 - line1 > 1L) lines[(line1 + 1L):(line2 - 1L)] else character()
+    middle <- if (line2 - line1 > 1L) {
+      lines[(line1 + 1L):(line2 - 1L)]
+    } else {
+      character()
+    }
     last <- substr(lines[line2], 1L, col2)
     text <- paste(trimws(c(first, middle, last)), collapse = " ")
   }

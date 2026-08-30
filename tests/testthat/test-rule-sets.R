@@ -62,7 +62,7 @@ test_that("print groups findings under the rule that produced them", {
   expect_true(all(store_at > domain_at))
 })
 
-test_that("a mixed rule set reports only the failing rule and accounts for the rest", {
+test_that("a mixed rule set reports failures and accounts for the rest", {
   result <- arch_check(
     list(
       ui_rule(),

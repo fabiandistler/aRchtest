@@ -18,7 +18,7 @@ test_that("arch_expect() fails when a selector matches nothing", {
   )
 })
 
-test_that("the failure message names the rule, the rationale and every finding", {
+test_that("the failure message names rule, rationale and findings", {
   expect_failure(
     arch_expect(
       ui_rule(why = "Presentation stays thin"),
@@ -50,7 +50,9 @@ test_that("the failure message names the rule, the rationale and every finding",
 })
 
 test_that("arch_expect() returns the result invisibly", {
-  result <- expect_invisible(arch_expect(ui_rule(), root = fixture("pkg_clean")))
+  result <- expect_invisible(
+    arch_expect(ui_rule(), root = fixture("pkg_clean"))
+  )
 
   expect_s3_class(result, "arch_result")
 })

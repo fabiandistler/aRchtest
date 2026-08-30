@@ -62,7 +62,9 @@ test_that("a non-zero ambiguous count is called out when printing", {
   text <- format(result)
 
   expect_true(any(grepl("AMBIGUOUS", text, fixed = TRUE)))
-  expect_true(any(grepl("ambiguous, not counted as violations", text, fixed = TRUE)))
+  expect_true(
+    any(grepl("ambiguous, not counted as violations", text, fixed = TRUE))
+  )
 })
 
 test_that("the ambiguity policy must be one of the documented values", {

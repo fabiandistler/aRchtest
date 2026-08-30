@@ -1,5 +1,6 @@
 ^\.git$
 ^\.gitignore$
+^\.lintr$
 ^AGENTS\.md$
 ^CLAUDE\.md$
 ^CONTEXT\.md$

@@ -12,7 +12,8 @@ arch_discover <- function(root) {
   root <- normalizePath(root, winslash = "/", mustWork = TRUE)
 
   description <- file.path(root, "DESCRIPTION")
-  is_package <- file.exists(description) && arch_is_package_description(description)
+  is_package <- file.exists(description) &&
+    arch_is_package_description(description)
 
   search_root <- if (is_package) file.path(root, "R") else root
   files <- if (dir.exists(search_root)) {
@@ -71,7 +72,8 @@ arch_declared_from_description <- function(path) {
   if (length(fields) == 0L) {
     return(character())
   }
-  raw <- unlist(strsplit(paste(dcf[1L, fields], collapse = ","), ",", fixed = TRUE))
+  joined <- paste(dcf[1L, fields], collapse = ",")
+  raw <- unlist(strsplit(joined, ",", fixed = TRUE))
   pkgs <- trimws(sub("\\(.*", "", raw))
   pkgs <- pkgs[nzchar(pkgs) & pkgs != "R" & !is.na(pkgs)]
   sort(unique(pkgs), method = "radix")

@@ -1,6 +1,8 @@
-test_that("an unqualified call to a forbidden declared dependency is a violation", {
+test_that("an unqualified call to a forbidden dependency is a violation", {
   result <- arch_check(ui_rule(), root = fixture("pkg_layered"))
-  unqualified <- result$violations[which(result$violations$resolved_by == "export")]
+  unqualified <- result$violations[
+    which(result$violations$resolved_by == "export")
+  ]
 
   expect_equal(nrow(unqualified), 1L)
   expect_equal(unqualified$file, "R/ui_dashboard.R")
@@ -98,7 +100,7 @@ test_that("an uninstallable dependency degrades resolution visibly", {
   expect_true(any(grepl("DEGRADED", format(result), fixed = TRUE)))
 })
 
-test_that("the project is parsed once regardless of how many rules are checked", {
+test_that("the project is parsed once regardless of rule count", {
   root <- fixture("pkg_layered")
   one <- arch_check(ui_rule(), root = root)
   many <- arch_check(

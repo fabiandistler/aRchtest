@@ -1,6 +1,8 @@
-test_that("a ::: call is a violation and is flagged as an internal API access", {
+test_that("a ::: call is a violation flagged as internal API access", {
   result <- arch_check(ui_rule(), root = fixture("pkg_layered"))
-  internal <- result$violations[which(result$violations$resolved_by == "namespace_internal")]
+  internal <- result$violations[
+    which(result$violations$resolved_by == "namespace_internal")
+  ]
 
   expect_equal(nrow(internal), 1L)
   expect_equal(internal$file, "R/ui_report.R")
@@ -20,16 +22,23 @@ test_that(":: and ::: calls to the same package are distinguishable", {
 
 test_that("violations are found at top level as well as inside functions", {
   result <- arch_check(ui_rule(), root = fixture("pkg_layered"))
-  top <- result$violations[which(result$violations$line == 1L & result$violations$file == "R/ui_report.R")]
+  top <- result$violations[
+    which(
+      result$violations$line == 1L &
+        result$violations$file == "R/ui_report.R"
+    )
+  ]
 
   expect_equal(nrow(top), 1L)
   expect_true(is.na(top$enclosing_function))
   expect_false(any(is.na(
-    result$violations$enclosing_function[result$violations$file == "R/ui_dashboard.R"]
+    result$violations$enclosing_function[
+      result$violations$file == "R/ui_dashboard.R"
+    ]
   )))
 })
 
-test_that("a violation in a nested function names the innermost enclosing function", {
+test_that("a nested violation names the innermost enclosing function", {
   result <- arch_check(ui_rule(), root = fixture("pkg_layered"))
   nested <- result$violations[which(result$violations$line == 5L)]
 
@@ -43,7 +52,7 @@ test_that("a forbidden name in a comment or a string produces no violation", {
   expect_equal(nrow(result$violations), 4L)
 })
 
-test_that("an unparseable file is reported, skipped, and does not stop the check", {
+test_that("an unparseable file is reported and skipped, not fatal", {
   expect_warning(
     result <- arch_check(ui_rule(), root = fixture("pkg_broken")),
     "could not be parsed"
@@ -64,7 +73,7 @@ test_that("a skipped file is visible in the printed result", {
   expect_true(any(grepl("R/ui_halfdone.R", format(result), fixed = TRUE)))
 })
 
-test_that("calls dispatched through an object are not attributed to a package", {
+test_that("object-dispatched calls are not attributed to a package", {
   root <- withr::local_tempdir()
   dir.create(file.path(root, "R"))
   writeLines(

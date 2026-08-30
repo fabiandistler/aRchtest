@@ -2,9 +2,9 @@
 "_PACKAGE"
 
 ## usethis namespace: start
+#' @importFrom data.table copy
 #' @importFrom data.table data.table
 #' @importFrom data.table rbindlist
-#' @importFrom data.table setattr
 #' @importFrom data.table setorderv
 ## usethis namespace: end
 NULL

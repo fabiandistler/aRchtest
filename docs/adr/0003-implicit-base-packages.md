@@ -62,6 +62,10 @@ up in tier 1 like any other dependency.
 - No unqualified call to a base function can be attributed to a declared package that
   happens to export the same name. Attribution is either unambiguous or reported as
   ambiguous; it is never a guess between the two.
+- The ambiguity fixtures use two pairs that ship with every R installation, so they
+  need no new dependency in CI: `stats` and `Matrix` both export `toeplitz`, and
+  `utils` and `Matrix` both export `head`. `Matrix` is declared in `Suggests`, and
+  the tests that rely on it call `skip_if_not_installed("Matrix")`.
 - A project *can* forbid a base package wholesale — `must_not_call(packages = "base")`
   is meaningful and will fire broadly. That is the user's choice to make.
 - Local definitions still win over both tiers, so a project helper named `system`

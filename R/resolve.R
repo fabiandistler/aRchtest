@@ -51,7 +51,11 @@ arch_resolve <- function(calls, local_index, declared_index, base_index) {
 
     if (!is.na(calls$package[i])) {
       owner[i] <- calls$package[i]
-      resolved_by[i] <- if (calls$internal[i]) "namespace_internal" else "namespace"
+      resolved_by[i] <- if (calls$internal[i]) {
+        "namespace_internal"
+      } else {
+        "namespace"
+      }
       next
     }
 

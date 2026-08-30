@@ -81,14 +81,40 @@ arch_ok <- function(result) {
   nrow(result$violations) == 0L && !any(result$rules$empty_selection)
 }
 
+#' Format a check result
+#'
+#' Builds the same readable summary [print.arch_result()] displays, but returns
+#' it as a character vector instead of writing it to the console. Use it when
+#' you want to route the summary somewhere else -- a log, a CI annotation, a
+#' file.
+#'
+#' @param x An `arch_result` from [arch_check()].
+#' @param ... Ignored.
+#'
+#' @return A character vector, one element per line of the summary.
 #' @export
+#'
+#' @examples
+#' project <- system.file("examples", "layered", package = "aRchtest")
+#'
+#' summary_lines <- format(arch_check(
+#'   rule("UI must not compute statistics") |>
+#'     modules_matching("R/ui_*.R") |>
+#'     must_not_call(packages = "stats"),
+#'   root = project
+#' ))
+#'
+#' writeLines(summary_lines)
 format.arch_result <- function(x, ...) {
   out <- c(
     paste0(
       "<arch_result> ", nrow(x$rules), " rule(s), ",
       nrow(x$violations), " violation(s)"
     ),
-    paste0("  root: ", x$root, if (x$is_package) " (package)" else " (non-package)")
+    paste0(
+      "  root: ", x$root,
+      if (x$is_package) " (package)" else " (non-package)"
+    )
   )
 
   for (i in seq_len(nrow(x$rules))) {

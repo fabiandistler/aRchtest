@@ -1,7 +1,10 @@
 test_that("a forbidden qualified call is reported with a located finding", {
   result <- arch_check(ui_rule(), root = fixture("pkg_layered"))
   found <- result$violations[
-    which(result$violations$file == "R/ui_dashboard.R" & result$violations$line == 2L)
+    which(
+      result$violations$file == "R/ui_dashboard.R" &
+        result$violations$line == 2L
+    )
   ]
 
   expect_equal(nrow(found), 1L)
@@ -21,7 +24,10 @@ test_that("every violation is reported, not just the first", {
   expect_equal(
     result$violations[, c("file", "line")],
     data.table::data.table(
-      file = c("R/ui_dashboard.R", "R/ui_dashboard.R", "R/ui_report.R", "R/ui_report.R"),
+      file = c(
+        "R/ui_dashboard.R", "R/ui_dashboard.R",
+        "R/ui_report.R", "R/ui_report.R"
+      ),
       line = c(2L, 6L, 1L, 5L)
     )
   )
@@ -92,7 +98,7 @@ test_that("the root defaults to the working directory", {
   })
 })
 
-test_that("results are identical across repeated checks and working directories", {
+test_that("results are identical across repeats and directories", {
   root <- fixture("pkg_layered")
   first <- arch_check(ui_rule(), root = root)
   second <- arch_check(ui_rule(), root = root)
@@ -131,10 +137,12 @@ test_that("arch_violations() returns the violations table", {
 })
 
 test_that("arch_check() rejects things that are not rules", {
-  expect_error(arch_check("not a rule", root = fixture("pkg_clean")), "rule\\(\\)")
-  expect_error(arch_check(list(), root = fixture("pkg_clean")), "non-empty list")
+  clean <- fixture("pkg_clean")
+
+  expect_error(arch_check("not a rule", root = clean), "rule\\(\\)")
+  expect_error(arch_check(list(), root = clean), "non-empty list")
   expect_error(
-    arch_check(list(ui_rule(), "nope"), root = fixture("pkg_clean")),
+    arch_check(list(ui_rule(), "nope"), root = clean),
     "element\\(s\\) 2"
   )
 })

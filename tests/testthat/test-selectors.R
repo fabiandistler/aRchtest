@@ -51,7 +51,7 @@ test_that("selectors compose so a rule can cover several patterns", {
   )
 })
 
-test_that("a selector matching no file fails the check with a distinct message", {
+test_that("a selector matching no file fails with a distinct message", {
   result <- arch_check(
     rule("typo") |>
       modules_matching("R/iu_*.R") |>
@@ -82,7 +82,7 @@ test_that("an empty selection is distinguishable from an ordinary violation", {
   expect_equal(result$rules$n_files, 0L)
 })
 
-test_that("print shows the selected-file count so a mis-scoped rule is noticeable", {
+test_that("print shows the selected-file count", {
   result <- arch_check(ui_rule(), root = fixture("pkg_layered"))
 
   expect_true(any(grepl("2 file(s) selected", format(result), fixed = TRUE)))
@@ -103,15 +103,23 @@ test_that("a constraint without a selector errors at construction", {
   )
 })
 
-test_that("a malformed package, function or module vector errors at construction", {
+test_that("a malformed argument vector errors at construction", {
   based <- rule("named rule") |> modules_matching("R/*.R")
 
-  expect_error(must_not_call(based, packages = character()), "must not be empty")
-  expect_error(must_not_call(based, packages = NA_character_), "must not contain NA")
+  expect_error(
+    must_not_call(based, packages = character()), "must not be empty"
+  )
+  expect_error(
+    must_not_call(based, packages = NA_character_), "must not contain NA"
+  )
   expect_error(must_not_call(based, packages = c("tools", "")), "empty strings")
   expect_error(must_not_call(based, packages = 42), "character vector")
-  expect_error(must_not_call(based, functions = list("system")), "character vector")
-  expect_error(must_not_depend_on(based, modules = character()), "must not be empty")
+  expect_error(
+    must_not_call(based, functions = list("system")), "character vector"
+  )
+  expect_error(
+    must_not_depend_on(based, modules = character()), "must not be empty"
+  )
   expect_error(must_not_call(based, packages = character()), "named rule")
 })
 
@@ -126,9 +134,13 @@ test_that("an unknown argument to a DSL verb errors at construction", {
   based <- rule("named rule") |> modules_matching("R/*.R")
 
   expect_error(must_not_call(based, package = "tools"), "unknown argument")
-  expect_error(must_not_call(based, packages = "tools", extra = 1), "unknown argument")
+  expect_error(
+    must_not_call(based, packages = "tools", extra = 1), "unknown argument"
+  )
   expect_error(must_not_depend_on(based, module = "R/x.R"), "unknown argument")
-  expect_error(modules_matching(rule("named rule"), "R/*.R", nope = 1), "unknown argument")
+  expect_error(
+    modules_matching(rule("named rule"), "R/*.R", nope = 1), "unknown argument"
+  )
   expect_error(must_not_call(based, package = "tools"), "named rule")
 })
 
@@ -155,5 +167,7 @@ test_that("a rule prints its selectors and constraints", {
   expect_output(print(built), "R/ui_*.R", fixed = TRUE)
   expect_output(print(built), "must not call packages: tools", fixed = TRUE)
   expect_output(print(built), "must not call functions: system", fixed = TRUE)
-  expect_output(print(built), "must not depend on modules: R/infra_*.R", fixed = TRUE)
+  expect_output(
+    print(built), "must not depend on modules: R/infra_*.R", fixed = TRUE
+  )
 })

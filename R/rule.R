@@ -20,7 +20,9 @@
 #' @examples
 #' rule("UI must not reach the database", why = "Presentation stays thin")
 rule <- function(name, why = NULL) {
-  if (!is.character(name) || length(name) != 1L || is.na(name) || !nzchar(name)) {
+  bad_name <- !is.character(name) || length(name) != 1L ||
+    is.na(name) || !nzchar(name)
+  if (bad_name) {
     stop("`name` must be a single non-empty string.", call. = FALSE)
   }
   if (!is.null(why)) {
