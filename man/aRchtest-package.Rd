@@ -4,9 +4,9 @@
 \name{aRchtest-package}
 \alias{aRchtest}
 \alias{aRchtest-package}
-\title{aRchtest: Declare and Enforce Architectural Rules in Tests}
+\title{aRchtest: Declare and Enforce Architectural Rules in 'testthat'}
 \description{
-Declare dependency rules between the modules of an R project and enforce them as ordinary 'testthat' tests. Rules are built with a small pipe-friendly domain-specific language and checked by static analysis of the project sources, so the code under analysis is never sourced, loaded or evaluated.
+Declare architectural boundaries between the modules of an R project as data and enforce them as ordinary 'testthat' tests. Rules are built with a small pipe-friendly grammar, checked by static analysis of the project's parse data, and reported as located findings naming the file, line, enclosing function and offending call. The code under analysis is never sourced, loaded or evaluated, so checks are deterministic, safe in continuous integration, and work on a project that does not currently run.
 }
 \seealso{
 Useful links:

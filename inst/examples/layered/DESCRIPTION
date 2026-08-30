@@ -1,0 +1,11 @@
+Package: layeredexample
+Title: A Tiny Layered Project Used by aRchtest Examples
+Version: 0.1.0
+Authors@R:
+    person("Fabian", "Distler", , "fdistlermpi@gmail.com", role = c("aut", "cre"))
+Description: A minimal package-shaped project with a UI layer, a domain layer
+    and an infrastructure layer, used by the aRchtest examples and vignette.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Imports:
+    stats

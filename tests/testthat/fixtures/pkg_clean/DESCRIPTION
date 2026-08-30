@@ -1,0 +1,4 @@
+Package: cleanfixture
+Version: 0.1.0
+Imports:
+    tools
