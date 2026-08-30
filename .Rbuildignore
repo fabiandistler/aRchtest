@@ -9,3 +9,7 @@
 ^\.scratch$
 ^aRchtest\.Rproj$
 ^\.Rproj\.user$
+^LICENSE\.md$
+^\.git$
+^.*\.Rcheck$
+^.*\.tar\.gz$
