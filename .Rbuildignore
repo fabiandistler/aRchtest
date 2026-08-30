@@ -1,3 +1,5 @@
+^\.git$
+^\.gitignore$
 ^AGENTS\.md$
 ^CLAUDE\.md$
 ^CONTEXT\.md$
@@ -9,3 +11,5 @@
 ^\.scratch$
 ^aRchtest\.Rproj$
 ^\.Rproj\.user$
+^LICENSE\.md$
+^README\.Rmd$

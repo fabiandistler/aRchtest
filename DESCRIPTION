@@ -1,11 +1,33 @@
 Package: aRchtest
-Title: What the Package Does (One Line, Title Case)
+Title: Declare and Enforce Architectural Rules in 'testthat'
 Version: 0.0.0.9001
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Authors@R:
+    person("Fabian", "Distler", , "fdistlermpi@gmail.com", role = c("aut", "cre"))
+Description: Declare architectural boundaries between the modules of an R
+    project as data and enforce them as ordinary 'testthat' tests. Rules are
+    built with a small pipe-friendly grammar, checked by static analysis of
+    the project's parse data, and reported as located findings naming the
+    file, line, enclosing function and offending call. The code under
+    analysis is never sourced, loaded or evaluated, so checks are
+    deterministic, safe in continuous integration, and work on a project
+    that does not currently run.
+License: MIT + file LICENSE
 Encoding: UTF-8
+Depends:
+    R (>= 4.1.0)
+Imports:
+    data.table,
+    utils
+Suggests:
+    knitr,
+    Matrix,
+    rmarkdown,
+    testthat (>= 3.0.0),
+    withr
+VignetteBuilder:
+    knitr
+Config/testthat/edition: 3
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 8.0.0
+URL: https://github.com/fabiandistler/aRchtest
+BugReports: https://github.com/fabiandistler/aRchtest/issues
