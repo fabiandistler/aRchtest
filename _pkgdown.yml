@@ -1,4 +1,9 @@
 url: https://fabiandistler.github.io/aRchtest/
+
+# docs/ holds hand-written project documentation (ADRs, agent docs), so the
+# generated site goes to _site/ instead. The pkgdown workflow deploys that
+# directory to the gh-pages branch.
+destination: _site
+
 template:
   bootstrap: 5
-
