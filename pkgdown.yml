@@ -1,0 +1,9 @@
+pandoc: 3.8.3
+pkgdown: 2.2.1
+pkgdown_sha: ~
+articles:
+  aRchtest: aRchtest.html
+last_built: 2026-08-31T06:17Z
+urls:
+  reference: https://fabiandistler.github.io/aRchtest/reference
+  article: https://fabiandistler.github.io/aRchtest/articles
