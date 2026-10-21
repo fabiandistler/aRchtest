@@ -73,6 +73,12 @@ Calls are attributed in this order:
    `grDevices`, `datasets`, so `must_not_call(functions = "system")` fires.
 5. Otherwise unresolved — recorded and counted, never reported as a violation.
 
+Bare project functions passed directly as call arguments are also resolved as
+module dependencies (`resolved_by = "value"`). A matching local formal or
+assignment in the calling function is treated as a shadowing variable, not as a
+project function.
+Aliases and functions obtained through dynamic dispatch remain unresolved.
+
 ## Read the resolution counts
 
 > **Dependency packages must be installed** for unqualified calls to be resolved.

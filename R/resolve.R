@@ -40,6 +40,16 @@ arch_lookup <- function(index, symbol) {
 }
 
 arch_resolve <- function(calls, local_index, declared_index, base_index) {
+  value_candidates <- which(calls$value)
+  if (length(value_candidates)) {
+    is_project_function <- vapply(value_candidates, function(i) {
+      length(arch_lookup(local_index, calls$symbol[i])) > 0L
+    }, logical(1))
+    keep <- !calls$value
+    keep[value_candidates] <- is_project_function
+    calls <- calls[keep]
+  }
+
   n <- nrow(calls)
   owner <- rep(NA_character_, n)
   resolved_by <- rep("unresolved", n)
@@ -56,6 +66,17 @@ arch_resolve <- function(calls, local_index, declared_index, base_index) {
       } else {
         "namespace"
       }
+      next
+    }
+
+    if (calls$value[i]) {
+      local_files <- arch_lookup(local_index, symbol)
+      owner[i] <- if (calls$file[i] %in% local_files) {
+        calls$file[i]
+      } else {
+        local_files[1L]
+      }
+      resolved_by[i] <- "value"
       next
     }
 

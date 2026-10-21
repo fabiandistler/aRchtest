@@ -74,3 +74,42 @@ test_that("one rule can carry both constraints and report findings from each", {
   expect_setequal(result$violations$callee, c("store_lookup", "system"))
   expect_setequal(result$violations$owner, c("R/infra_store.R", "base"))
 })
+
+test_that("project functions passed as values create module dependencies", {
+  root <- withr::local_tempdir()
+  dir.create(file.path(root, "R"))
+  writeLines("load_sales <- function(con) 1", file.path(root, "R/db.R"))
+  writeLines(
+    c(
+      "plot_all <- function(cons) {",
+      "  a <- lapply(cons, load_sales)",
+      "  b <- purrr::map(cons, load_sales)",
+      "  c <- Reduce(load_sales, cons)",
+      "  list(a, b, c)",
+      "}",
+      "shadowed_formal <- function(cons, load_sales) {",
+      "  lapply(cons, load_sales)",
+      "}",
+      "shadowed_local <- function(cons) {",
+      "  load_sales <- identity",
+      "  lapply(cons, load_sales)",
+      "}"
+    ),
+    file.path(root, "R/domain_plot.R")
+  )
+
+  result <- arch_check(
+    rule("plot must not depend on db") |>
+      modules_matching("R/domain_plot.R") |>
+      must_not_depend_on(modules = "R/db.R"),
+    root = root
+  )
+
+  expect_equal(nrow(result$violations), 3L)
+  expect_equal(result$violations$line, 2:4)
+  expect_equal(result$violations$callee, rep("load_sales", 3L))
+  expect_equal(result$violations$owner, rep("R/db.R", 3L))
+  expect_equal(result$violations$resolved_by, rep("value", 3L))
+  expect_equal(result$violations$source_text, rep("load_sales", 3L))
+  expect_equal(result$counts$call_sites, 9L)
+})

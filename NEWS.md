@@ -1,3 +1,8 @@
+# aRchtest (development version)
+
+* `must_not_depend_on()` now detects project functions passed directly as call
+  arguments, while respecting matching local formals and assignments.
+
 # aRchtest 0.1.0
 
 Initial release. `aRchtest` declares architectural boundaries between the

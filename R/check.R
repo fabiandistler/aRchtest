@@ -1,5 +1,5 @@
 arch_resolved_methods <- c(
-  "namespace", "namespace_internal", "local", "export", "base"
+  "namespace", "namespace_internal", "local", "value", "export", "base"
 )
 arch_package_methods <- c("namespace", "namespace_internal", "export", "base")
 
@@ -363,7 +363,7 @@ arch_match_must_not_depend_on <- function(scoped, constraint, files) {
     })
   )
 
-  violation <- scoped$resolved_by == "local" &
+  violation <- scoped$resolved_by %in% c("local", "value") &
     scoped$owner %in% forbidden &
     scoped$owner != scoped$file
 

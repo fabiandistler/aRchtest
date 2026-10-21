@@ -11,6 +11,7 @@ arch_empty_calls <- function() {
     package = character(),
     internal = logical(),
     dynamic = logical(),
+    value = logical(),
     source_text = character()
   )
 }
@@ -159,6 +160,14 @@ arch_symbol_text <- function(id, nav) {
 }
 
 arch_enclosing_function <- function(start_id, nav, def_names) {
+  scope_id <- arch_enclosing_function_id(start_id, nav, def_names)
+  if (is.na(scope_id)) {
+    return(NA_character_)
+  }
+  def_names[[as.character(scope_id)]]
+}
+
+arch_enclosing_function_id <- function(start_id, nav, def_names) {
   pd <- nav$pd
   keys <- names(def_names)
   current <- start_id
@@ -173,14 +182,78 @@ arch_enclosing_function <- function(start_id, nav, def_names) {
     }
     key <- as.character(parent_id)
     if (key %in% keys) {
-      nm <- def_names[[key]]
-      if (!is.na(nm)) {
-        return(nm)
-      }
+      return(as.integer(parent_id))
     }
     current <- parent_id
   }
-  NA_character_
+  NA_integer_
+}
+
+arch_bare_symbol_row <- function(id, nav) {
+  pd <- nav$pd
+  kids <- arch_children(nav, id)
+  if (length(kids) == 1L && pd$token[kids] == "SYMBOL") {
+    return(kids)
+  }
+  expr_kids <- kids[pd$token[kids] == "expr"]
+  other_kids <- kids[!pd$token[kids] %in% c("expr", "(", ")")]
+  if (length(expr_kids) == 1L && !length(other_kids)) {
+    return(arch_bare_symbol_row(pd$id[expr_kids], nav))
+  }
+  NA_integer_
+}
+
+arch_assignment_target_rows <- function(pd, nav) {
+  rows <- which(pd$token %in% c("LEFT_ASSIGN", "EQ_ASSIGN", "RIGHT_ASSIGN"))
+  if (!length(rows)) {
+    return(integer())
+  }
+
+  targets <- vapply(rows, function(row) {
+    assign_id <- pd$parent[row]
+    kids <- arch_children(nav, assign_id)
+    expr_kids <- kids[pd$token[kids] == "expr"]
+    if (length(expr_kids) < 2L) {
+      return(NA_integer_)
+    }
+    value <- if (pd$token[row] == "RIGHT_ASSIGN") {
+      expr_kids[1L]
+    } else {
+      expr_kids[length(expr_kids)]
+    }
+    if (any(pd$token[arch_children(nav, pd$id[value])] == "FUNCTION")) {
+      return(NA_integer_)
+    }
+    target <- if (pd$token[row] == "RIGHT_ASSIGN") {
+      expr_kids[length(expr_kids)]
+    } else {
+      expr_kids[1L]
+    }
+    arch_bare_symbol_row(pd$id[target], nav)
+  }, integer(1))
+
+  targets[!is.na(targets)]
+}
+
+arch_value_bindings <- function(pd, nav, def_names) {
+  assignment_targets <- arch_assignment_target_rows(pd, nav)
+  rows <- unique(c(
+    which(pd$token == "SYMBOL_FORMALS"),
+    assignment_targets
+  ))
+  if (!length(rows)) {
+    return(data.table::data.table(symbol = character(), scope = character()))
+  }
+
+  scope <- vapply(rows, function(row) {
+    id <- arch_enclosing_function_id(pd$id[row], nav, def_names)
+    if (is.na(id)) "<top-level>" else as.character(id)
+  }, character(1))
+
+  data.table::data.table(
+    symbol = arch_unquote(pd$text[rows]),
+    scope = scope
+  )
 }
 
 arch_first_argument_id <- function(call_id, function_expr_id, nav) {
@@ -203,6 +276,8 @@ arch_call_sites <- function(pd, nav, def_names, lines, rel_path) {
     return(arch_empty_calls())
   }
 
+  value_bindings <- arch_value_bindings(pd, nav, def_names)
+
   n <- length(rows)
   out_line <- integer(n)
   out_column <- integer(n)
@@ -212,6 +287,7 @@ arch_call_sites <- function(pd, nav, def_names, lines, rel_path) {
   out_package <- character(n)
   out_internal <- logical(n)
   out_dynamic <- logical(n)
+  out_value <- rep(FALSE, n)
   out_source <- character(n)
 
   for (i in seq_len(n)) {
@@ -264,7 +340,7 @@ arch_call_sites <- function(pd, nav, def_names, lines, rel_path) {
     )
   }
 
-  data.table::data.table(
+  calls <- data.table::data.table(
     file = rep(rel_path, n),
     line = as.integer(out_line),
     column = as.integer(out_column),
@@ -274,8 +350,68 @@ arch_call_sites <- function(pd, nav, def_names, lines, rel_path) {
     package = out_package,
     internal = out_internal,
     dynamic = out_dynamic,
+    value = out_value,
     source_text = out_source
   )
+
+  value_rows <- integer()
+  for (row in rows) {
+    function_expr_id <- pd$parent[row]
+    fr <- arch_row_of(nav, function_expr_id)
+    if (is.na(fr) || is.na(pd$parent[fr]) || pd$parent[fr] <= 0L) {
+      next
+    }
+    call_id <- pd$parent[fr]
+    kids <- arch_children(nav, call_id)
+    args <- kids[
+      pd$token[kids] %in% c("expr", "expr_or_assign_or_help") &
+        pd$id[kids] != function_expr_id
+    ]
+    for (arg in args) {
+      symbol_row <- arch_bare_symbol_row(pd$id[arg], nav)
+      if (is.na(symbol_row)) {
+        next
+      }
+      symbol <- arch_unquote(pd$text[symbol_row])
+      scope_id <- arch_enclosing_function_id(pd$id[symbol_row], nav, def_names)
+      scope <- if (is.na(scope_id)) "<top-level>" else as.character(scope_id)
+      is_shadowed <- any(
+        value_bindings$symbol == symbol & value_bindings$scope == scope
+      )
+      if (is_shadowed) {
+        next
+      }
+      value_rows <- c(value_rows, symbol_row)
+    }
+  }
+
+  if (!length(value_rows)) {
+    return(calls)
+  }
+
+  value_rows <- unique(value_rows)
+  data.table::rbindlist(list(
+    calls,
+    data.table::data.table(
+      file = rep(rel_path, length(value_rows)),
+      line = as.integer(pd$line1[value_rows]),
+      column = as.integer(pd$col1[value_rows]),
+      enclosing_function = vapply(value_rows, function(row) {
+        arch_enclosing_function(pd$id[row], nav, def_names)
+      }, character(1)),
+      callee = arch_unquote(pd$text[value_rows]),
+      symbol = arch_unquote(pd$text[value_rows]),
+      package = NA_character_,
+      internal = FALSE,
+      dynamic = FALSE,
+      value = TRUE,
+      source_text = vapply(value_rows, function(row) {
+        arch_slice_source(
+          lines, pd$line1[row], pd$col1[row], pd$line2[row], pd$col2[row]
+        )
+      }, character(1))
+    )
+  ))
 }
 
 arch_library_calls <- function(pd, nav) {
