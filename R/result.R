@@ -163,7 +163,10 @@ arch_empty_selection_text <- function(x, name) {
   patterns <- x$rules$patterns[match(name, x$rules$rule)]
   paste0(
     "EMPTY SELECTION: rule '", name, "' selected no file with pattern(s) ",
-    patterns, ". A rule that selects nothing cannot pass -- fix the pattern."
+    patterns, " under root ", x$root,
+    if (x$is_package) " (package)" else " (non-package)",
+    ". A rule that selects nothing cannot pass -- fix the pattern, ",
+    "or pass `root` if this is not the project root."
   )
 }
 

@@ -3,6 +3,9 @@ arch_excluded_dirs <- c(
 )
 
 arch_discover <- function(root) {
+  if (is.null(root)) {
+    root <- arch_find_root(getwd())
+  }
   if (!is.character(root) || length(root) != 1L || is.na(root)) {
     stop("`root` must be a single path.", call. = FALSE)
   }
@@ -39,6 +42,49 @@ arch_discover <- function(root) {
     description = if (is_package) description else NA_character_,
     files = rel
   )
+}
+
+# The project root a check runs against when the caller names none: the
+# nearest directory at or above `start` holding a DESCRIPTION or an .Rproj
+# file. testthat runs test files from tests/testthat, so the working directory
+# itself is rarely the root. Under R CMD check the tests run in
+# <pkg>.Rcheck/tests/testthat, beside a copy of the sources in
+# <pkg>.Rcheck/00_pkg_src/<pkg>; that copy is the root there. With no marker
+# anywhere above, the working directory is the root (a script project).
+arch_find_root <- function(start) {
+  dir <- normalizePath(start, winslash = "/", mustWork = TRUE)
+  repeat {
+    if (arch_is_project_root(dir)) {
+      return(dir)
+    }
+    checked_source <- arch_checked_source(dir)
+    if (!is.na(checked_source)) {
+      return(checked_source)
+    }
+    parent <- dirname(dir)
+    if (identical(parent, dir)) {
+      return(start)
+    }
+    dir <- parent
+  }
+}
+
+arch_is_project_root <- function(dir) {
+  description <- file.path(dir, "DESCRIPTION")
+  (file.exists(description) && !dir.exists(description)) ||
+    length(list.files(dir, pattern = "\\.Rproj$")) > 0L
+}
+
+arch_checked_source <- function(dir) {
+  if (!endsWith(basename(dir), ".Rcheck")) {
+    return(NA_character_)
+  }
+  package <- sub("\\.Rcheck$", "", basename(dir))
+  source <- file.path(dir, "00_pkg_src", package)
+  if (!file.exists(file.path(source, "DESCRIPTION"))) {
+    return(NA_character_)
+  }
+  normalizePath(source, winslash = "/", mustWork = TRUE)
 }
 
 arch_is_package_description <- function(path) {

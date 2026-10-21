@@ -111,11 +111,21 @@ AMBIGUOUS: 2 call site(s) could not be attributed to one package.
 
 Pass `on_ambiguous = "fail"` if you want a stricter posture.
 
+## Where the check looks
+
+Put the rule in any file under `tests/testthat/` and leave `root` out. The check
+walks up from the working directory to the nearest directory holding a
+`DESCRIPTION` or an `.Rproj` file and analyses that project, so the same test
+works under `devtools::test()`, `testthat::test_local()` and `R CMD check`
+(where it reads the package sources that `R CMD check` keeps in
+`<pkg>.Rcheck/00_pkg_src/`). Pass `root` to analyse another directory; an
+explicit `root` is used as given.
+
 ## A rule that selects nothing fails
 
 A vacuously green architecture test is worse than no test at all, so a selector
-that matches no file fails the check with a distinct message naming the rule and
-the pattern.
+that matches no file fails the check with a distinct message naming the rule,
+the pattern and the root it was checked against.
 
 ## Installation
 
