@@ -3,7 +3,7 @@ pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   aRchtest: aRchtest.html
-last_built: 2026-10-21T15:05Z
+last_built: 2026-10-21T15:13Z
 urls:
   reference: https://fabiandistler.github.io/aRchtest/reference
   article: https://fabiandistler.github.io/aRchtest/articles
