@@ -4,14 +4,19 @@
 \alias{arch_expect}
 \title{Enforce architectural rules as a testthat expectation}
 \usage{
-arch_expect(rules, root = ".", on_ambiguous = c("report", "fail"))
+arch_expect(rules, root = NULL, on_ambiguous = c("report", "fail"))
 }
 \arguments{
 \item{rules}{A single \code{arch_rule} or a list of them. Rule names must be
 unique, so every finding stays attributable to the rule that produced it.}
 
-\item{root}{Path to the project root to analyse. Defaults to the working
-directory. All file selection and every reported path is relative to this
+\item{root}{Path to the project root to analyse, used as given. By default
+the root is found by walking up from the working directory to the nearest
+directory holding a \code{DESCRIPTION} or an \code{.Rproj} file, so a rule written in
+\verb{tests/testthat/} analyses the project it lives in. Under \verb{R CMD check}
+the copy of the package sources in \verb{<pkg>.Rcheck/00_pkg_src/<pkg>} is used.
+With no such marker above the working directory, the working directory is
+the root. All file selection and every reported path is relative to this
 root, so rules read the same wherever the tests run from.}
 
 \item{on_ambiguous}{What to do with a call whose symbol is exported by more

@@ -57,8 +57,11 @@ result <- arch_check(ui_layer, root = project)
 result
 ```
 
-In your own package the root defaults to the working directory, so you would
-simply write `arch_check(ui_layer)`.
+In your own package you would simply write `arch_check(ui_layer)` in a file
+under `tests/testthat/`. Without `root`, the check walks up from the working
+directory to the nearest directory holding a `DESCRIPTION` or an `.Rproj` file,
+so it analyses your package whether the tests run under `devtools::test()`,
+`testthat::test_local()` or `R CMD check`.
 
 ## Reading a failure
 

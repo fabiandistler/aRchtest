@@ -32,8 +32,13 @@ arch_package_methods <- c("namespace", "namespace_internal", "export", "base")
 #'
 #' @param rules A single `arch_rule` or a list of them. Rule names must be
 #'   unique, so every finding stays attributable to the rule that produced it.
-#' @param root Path to the project root to analyse. Defaults to the working
-#'   directory. All file selection and every reported path is relative to this
+#' @param root Path to the project root to analyse, used as given. By default
+#'   the root is found by walking up from the working directory to the nearest
+#'   directory holding a `DESCRIPTION` or an `.Rproj` file, so a rule written in
+#'   `tests/testthat/` analyses the project it lives in. Under `R CMD check`
+#'   the copy of the package sources in `<pkg>.Rcheck/00_pkg_src/<pkg>` is used.
+#'   With no such marker above the working directory, the working directory is
+#'   the root. All file selection and every reported path is relative to this
 #'   root, so rules read the same wherever the tests run from.
 #' @param on_ambiguous What to do with a call whose symbol is exported by more
 #'   than one candidate package and which is not defined locally.
@@ -65,7 +70,8 @@ arch_package_methods <- c("namespace", "namespace_internal", "export", "base")
 #'
 #' result
 #' result$violations
-arch_check <- function(rules, root = ".", on_ambiguous = c("report", "fail")) {
+arch_check <- function(rules, root = NULL,
+                       on_ambiguous = c("report", "fail")) {
   on_ambiguous <- match.arg(on_ambiguous)
   rules <- arch_as_rule_list(rules)
 

@@ -29,7 +29,8 @@
 #'       arch_expect(root = project)
 #'   })
 #' }
-arch_expect <- function(rules, root = ".", on_ambiguous = c("report", "fail")) {
+arch_expect <- function(rules, root = NULL,
+                        on_ambiguous = c("report", "fail")) {
   if (!requireNamespace("testthat", quietly = TRUE)) {
     stop(
       "arch_expect() needs the testthat package. ",
