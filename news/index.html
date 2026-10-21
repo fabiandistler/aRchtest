@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">aRchtest</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,50 +34,45 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="archtest-development-version">aRchtest (development version)<a class="anchor" aria-label="anchor" href="#archtest-development-version"></a></h2>
-<ul><li>
-<code><a href="../reference/arch_check.html">arch_check()</a></code> and <code><a href="../reference/arch_expect.html">arch_expect()</a></code> now find the project root when <code>root</code> is not given: they walk up from the working directory to the nearest directory holding a <code>DESCRIPTION</code> or an <code>.Rproj</code> file, and under <code>R CMD check</code> use the package sources in <code>&lt;pkg&gt;.Rcheck/00_pkg_src/&lt;pkg&gt;</code>. Previously the default <code>root = "."</code> pointed at <code>tests/testthat</code> under testthat, so the README example failed with EMPTY SELECTION on clean code. An explicit <code>root</code> is still used as given (<a href="https://github.com/fabiandistler/aRchtest/issues/19" class="external-link">#19</a>).</li>
-<li>The EMPTY SELECTION message names the root the rule was checked against, so a wrong root is no longer reported as a wrong pattern (<a href="https://github.com/fabiandistler/aRchtest/issues/19" class="external-link">#19</a>).</li>
-</ul></div>
-    <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.0.0.9001" id="archtest-0009001">aRchtest 0.0.0.9001<a class="anchor" aria-label="anchor" href="#archtest-0009001"></a></h2>
-<p>Initial development release. <code>aRchtest</code> lets you declare architectural boundaries as data and enforce them as ordinary <code>testthat</code> tests.</p>
+<h2 class="pkg-version" data-toc-text="0.1.0" id="archtest-010">aRchtest 0.1.0<a class="anchor" aria-label="anchor" href="#archtest-010"></a></h2>
+<p>Initial release. <code>aRchtest</code> declares architectural boundaries between the modules of an R project as data and enforces them as ordinary <code>testthat</code> tests.</p>
 <div class="section level3">
-<h3 id="the-grammar-0-0-0-9001">The grammar<a class="anchor" aria-label="anchor" href="#the-grammar-0-0-0-9001"></a></h3>
+<h3 id="new-features-0-1-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-1-0"></a></h3>
 <ul><li>
-<code><a href="../reference/rule.html">rule()</a></code> starts a rule with a name and an optional rationale. A rule is inert data: building one performs no analysis.</li>
+<code><a href="../reference/arch_check.html">arch_check()</a></code> takes a single rule or a list of them and returns an <code>arch_result</code> carrying a <code>data.table</code> of violations with one row per finding: rule, file, line, column, enclosing function, callee, resolved owner, how it was resolved, an internal-API flag and the source text of the call. A clean check returns an empty table with the same columns and types, never <code>NULL</code>. The project is discovered, parsed and resolved once per check regardless of how many rules are supplied.</li>
+<li>
+<code><a href="../reference/arch_expect.html">arch_expect()</a></code> wraps the same check as a <code>testthat</code> expectation.</li>
+<li>
+<code><a href="../reference/arch_violations.html">arch_violations()</a></code> accesses the violations table.</li>
+<li>
+<code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> and <code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code> methods give a readable summary grouped by rule.</li>
 <li>
 <code><a href="../reference/modules_matching.html">modules_matching()</a></code> and <code><a href="../reference/modules_matching.html">modules_matching_regex()</a></code> narrow a rule to a set of files, by glob or by regular expression, relative to the project root.</li>
 <li>
 <code><a href="../reference/must_not_call.html">must_not_call()</a></code> forbids packages, individual functions, or both.</li>
 <li>
 <code><a href="../reference/must_not_depend_on.html">must_not_depend_on()</a></code> forbids a dependency on other modules of the same project, so <code>domain/</code> can be held away from <code>infra/</code>.</li>
-<li>The verbs compose with the base R pipe; no magrittr or tidyverse dependency.</li>
+<li>
+<code><a href="../reference/rule.html">rule()</a></code> starts a rule with a name and an optional rationale. A rule is inert data: building one performs no analysis.</li>
+<li>Rules compose with the base R pipe; no magrittr or tidyverse dependency.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="checking-0-0-0-9001">Checking<a class="anchor" aria-label="anchor" href="#checking-0-0-0-9001"></a></h3>
-<ul><li>
-<code><a href="../reference/arch_check.html">arch_check()</a></code> returns an <code>arch_result</code> carrying a <code>data.table</code> of violations with one row per finding — rule, file, line, column, enclosing function, callee, resolved owner, how it was resolved, an internal-API flag and the source text of the call. A clean check returns an empty table with the same columns and types, never <code>NULL</code>.</li>
-<li>
-<code><a href="../reference/arch_expect.html">arch_expect()</a></code> wraps the same check as a <code>testthat</code> expectation.</li>
-<li>
-<code><a href="../reference/arch_violations.html">arch_violations()</a></code> accesses the violations table.</li>
-<li>
-<code><a href="../reference/arch_check.html">arch_check()</a></code> accepts a single rule or a list of them; the project is discovered, parsed and resolved once per check regardless of how many rules are supplied.</li>
-<li>
-<code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> and <code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code> methods give a readable summary grouped by rule.</li>
-</ul></div>
-<div class="section level3">
-<h3 id="analysis-0-0-0-9001">Analysis<a class="anchor" aria-label="anchor" href="#analysis-0-0-0-9001"></a></h3>
+<h3 id="resolution-0-1-0">Resolution<a class="anchor" aria-label="anchor" href="#resolution-0-1-0"></a></h3>
 <ul><li>The engine reads parse data only and never sources, loads or evaluates the code under analysis, so checks are deterministic and work on a project that does not currently run.</li>
+<li>Declared dependencies come from <code>DESCRIPTION</code> for a package project and from <code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code>/<code><a href="https://rdrr.io/r/base/library.html" class="external-link">require()</a></code> calls for a Shiny app, plumber API or script project.</li>
 <li>Unqualified calls are resolved against declared dependencies, so a rule cannot be evaded by dropping the <code>::</code> prefix. Local definitions win over package exports.</li>
 <li>Base packages count as declared, so <code>must_not_call(functions = "system")</code> fires on a bare <code><a href="https://rdrr.io/r/base/system.html" class="external-link">system()</a></code> call.</li>
-<li>Declared dependencies come from <code>DESCRIPTION</code> for a package project and from <code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code>/<code><a href="https://rdrr.io/r/base/library.html" class="external-link">require()</a></code> calls for a Shiny app, plumber API or script project.</li>
-<li>A symbol exported by more than one candidate is reported as <strong>ambiguous</strong> rather than guessed at, and <code>on_ambiguous = "fail"</code> makes ambiguity a violation.</li>
+<li>A symbol exported by more than one candidate is reported as ambiguous rather than guessed at, and <code>on_ambiguous = "fail"</code> makes ambiguity a violation.</li>
 <li>Calls that cannot be attributed are counted, never reported as violations, and the resolution counts are part of every result.</li>
 <li>A dependency whose exports cannot be enumerated degrades resolution visibly rather than erroring or reporting a falsely clean project.</li>
 <li>A file that does not parse is reported with a warning and skipped; the check still covers every other file and says the analysis was partial.</li>
 <li>A selector that matches no file fails the check rather than passing silently.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="minor-improvements-and-fixes-0-1-0">Minor improvements and fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-fixes-0-1-0"></a></h3>
+<ul><li>
+<code><a href="../reference/arch_check.html">arch_check()</a></code> and <code><a href="../reference/arch_expect.html">arch_expect()</a></code> find the project root when <code>root</code> is not given: they walk up from the working directory to the nearest directory holding a <code>DESCRIPTION</code> or an <code>.Rproj</code> file, and under <code>R CMD check</code> use the package sources in <code>&lt;pkg&gt;.Rcheck/00_pkg_src/&lt;pkg&gt;</code>. Previously the default <code>root = "."</code> pointed at <code>tests/testthat</code> under testthat, so the README example failed with EMPTY SELECTION on clean code. An explicit <code>root</code> is still used as given (<a href="https://github.com/fabiandistler/aRchtest/issues/19" class="external-link">#19</a>).</li>
+<li>The EMPTY SELECTION message names the root the rule was checked against, so a wrong root is no longer reported as a wrong pattern (<a href="https://github.com/fabiandistler/aRchtest/issues/19" class="external-link">#19</a>).</li>
 </ul></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
