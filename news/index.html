@@ -34,6 +34,12 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="development version" id="archtest-development-version">aRchtest (development version)<a class="anchor" aria-label="anchor" href="#archtest-development-version"></a></h2>
+<ul><li>
+<code><a href="../reference/arch_check.html">arch_check()</a></code> and <code><a href="../reference/arch_expect.html">arch_expect()</a></code> now find the project root when <code>root</code> is not given: they walk up from the working directory to the nearest directory holding a <code>DESCRIPTION</code> or an <code>.Rproj</code> file, and under <code>R CMD check</code> use the package sources in <code>&lt;pkg&gt;.Rcheck/00_pkg_src/&lt;pkg&gt;</code>. Previously the default <code>root = "."</code> pointed at <code>tests/testthat</code> under testthat, so the README example failed with EMPTY SELECTION on clean code. An explicit <code>root</code> is still used as given (<a href="https://github.com/fabiandistler/aRchtest/issues/19" class="external-link">#19</a>).</li>
+<li>The EMPTY SELECTION message names the root the rule was checked against, so a wrong root is no longer reported as a wrong pattern (<a href="https://github.com/fabiandistler/aRchtest/issues/19" class="external-link">#19</a>).</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.0.9001" id="archtest-0009001">aRchtest 0.0.0.9001<a class="anchor" aria-label="anchor" href="#archtest-0009001"></a></h2>
 <p>Initial development release. <code>aRchtest</code> lets you declare architectural boundaries as data and enforce them as ordinary <code>testthat</code> tests.</p>
 <div class="section level3">

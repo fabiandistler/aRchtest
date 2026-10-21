@@ -1,5 +1,22 @@
 # Changelog
 
+## aRchtest (development version)
+
+- [`arch_check()`](https://fabiandistler.github.io/aRchtest/reference/arch_check.md)
+  and
+  [`arch_expect()`](https://fabiandistler.github.io/aRchtest/reference/arch_expect.md)
+  now find the project root when `root` is not given: they walk up from
+  the working directory to the nearest directory holding a `DESCRIPTION`
+  or an `.Rproj` file, and under `R CMD check` use the package sources
+  in `<pkg>.Rcheck/00_pkg_src/<pkg>`. Previously the default
+  `root = "."` pointed at `tests/testthat` under testthat, so the README
+  example failed with EMPTY SELECTION on clean code. An explicit `root`
+  is still used as given
+  ([\#19](https://github.com/fabiandistler/aRchtest/issues/19)).
+- The EMPTY SELECTION message names the root the rule was checked
+  against, so a wrong root is no longer reported as a wrong pattern
+  ([\#19](https://github.com/fabiandistler/aRchtest/issues/19)).
+
 ## aRchtest 0.0.0.9001
 
 Initial development release. `aRchtest` lets you declare architectural

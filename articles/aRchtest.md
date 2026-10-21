@@ -64,8 +64,13 @@ result
 #> resolution: 9 of 9 call site(s) resolved, 0 ambiguous, 0 unresolved  (4 file(s) parsed)
 ```
 
-In your own package the root defaults to the working directory, so you
-would simply write `arch_check(ui_layer)`.
+In your own package you would simply write `arch_check(ui_layer)` in a
+file under `tests/testthat/`. Without `root`, the check walks up from
+the working directory to the nearest directory holding a `DESCRIPTION`
+or an `.Rproj` file, so it analyses your package whether the tests run
+under `devtools::test()`,
+[`testthat::test_local()`](https://testthat.r-lib.org/reference/test_package.html)
+or `R CMD check`.
 
 ## Reading a failure
 
@@ -250,7 +255,7 @@ arch_check(
   root = app
 )
 #> <arch_result> 1 rule(s), 1 violation(s)
-#>   root: /tmp/Rtmpkixvgf/shinyish (non-package)
+#>   root: /tmp/RtmpMY2GCl/shinyish (non-package)
 #> 
 #> * modules must not compute statistics -- 1 file(s) selected, 1 violation(s)
 #>     R/mod_table.R:2:3  in mod_table_server()  median -> stats [base]  median(id)

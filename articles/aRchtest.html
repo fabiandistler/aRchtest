@@ -109,8 +109,13 @@ findings as data:</p>
 <span><span class="co">#&gt;     R/ui_dashboard.R:2:15  in render_summary()  stats::median -&gt; stats [namespace]  stats::median(sales$amount)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; resolution: 9 of 9 call site(s) resolved, 0 ambiguous, 0 unresolved  (4 file(s) parsed)</span></span></code></pre></div>
-<p>In your own package the root defaults to the working directory, so
-you would simply write <code>arch_check(ui_layer)</code>.</p>
+<p>In your own package you would simply write
+<code>arch_check(ui_layer)</code> in a file under
+<code>tests/testthat/</code>. Without <code>root</code>, the check walks
+up from the working directory to the nearest directory holding a
+<code>DESCRIPTION</code> or an <code>.Rproj</code> file, so it analyses
+your package whether the tests run under <code>devtools::test()</code>,
+<code><a href="https://testthat.r-lib.org/reference/test_package.html" class="external-link">testthat::test_local()</a></code> or <code>R CMD check</code>.</p>
 </div>
 <div class="section level2">
 <h2 id="reading-a-failure">Reading a failure<a class="anchor" aria-label="anchor" href="#reading-a-failure"></a>
@@ -331,7 +336,7 @@ project’s own source instead:</p>
 <span>  root <span class="op">=</span> <span class="va">app</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;arch_result&gt; 1 rule(s), 1 violation(s)</span></span>
-<span><span class="co">#&gt;   root: /tmp/Rtmpkixvgf/shinyish (non-package)</span></span>
+<span><span class="co">#&gt;   root: /tmp/RtmpMY2GCl/shinyish (non-package)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; * modules must not compute statistics -- 1 file(s) selected, 1 violation(s)</span></span>
 <span><span class="co">#&gt;     R/mod_table.R:2:3  in mod_table_server()  median -&gt; stats [base]  median(id)</span></span>

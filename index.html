@@ -114,9 +114,14 @@ PARTIAL: 1 file(s) could not be parsed and were skipped: R/wip.R.
 <p>Pass <code>on_ambiguous = "fail"</code> if you want a stricter posture.</p>
 </div>
 <div class="section level2">
+<h2 id="where-the-check-looks">Where the check looks<a class="anchor" aria-label="anchor" href="#where-the-check-looks"></a>
+</h2>
+<p>Put the rule in any file under <code>tests/testthat/</code> and leave <code>root</code> out. The check walks up from the working directory to the nearest directory holding a <code>DESCRIPTION</code> or an <code>.Rproj</code> file and analyses that project, so the same test works under <code>devtools::test()</code>, <code><a href="https://testthat.r-lib.org/reference/test_package.html" class="external-link">testthat::test_local()</a></code> and <code>R CMD check</code> (where it reads the package sources that <code>R CMD check</code> keeps in <code>&lt;pkg&gt;.Rcheck/00_pkg_src/</code>). Pass <code>root</code> to analyse another directory; an explicit <code>root</code> is used as given.</p>
+</div>
+<div class="section level2">
 <h2 id="a-rule-that-selects-nothing-fails">A rule that selects nothing fails<a class="anchor" aria-label="anchor" href="#a-rule-that-selects-nothing-fails"></a>
 </h2>
-<p>A vacuously green architecture test is worse than no test at all, so a selector that matches no file fails the check with a distinct message naming the rule and the pattern.</p>
+<p>A vacuously green architecture test is worse than no test at all, so a selector that matches no file fails the check with a distinct message naming the rule, the pattern and the root it was checked against.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>

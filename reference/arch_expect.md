@@ -9,7 +9,7 @@ new command to remember.
 ## Usage
 
 ``` r
-arch_expect(rules, root = ".", on_ambiguous = c("report", "fail"))
+arch_expect(rules, root = NULL, on_ambiguous = c("report", "fail"))
 ```
 
 ## Arguments
@@ -21,9 +21,15 @@ arch_expect(rules, root = ".", on_ambiguous = c("report", "fail"))
 
 - root:
 
-  Path to the project root to analyse. Defaults to the working
-  directory. All file selection and every reported path is relative to
-  this root, so rules read the same wherever the tests run from.
+  Path to the project root to analyse, used as given. By default the
+  root is found by walking up from the working directory to the nearest
+  directory holding a `DESCRIPTION` or an `.Rproj` file, so a rule
+  written in `tests/testthat/` analyses the project it lives in. Under
+  `R CMD check` the copy of the package sources in
+  `<pkg>.Rcheck/00_pkg_src/<pkg>` is used. With no such marker above the
+  working directory, the working directory is the root. All file
+  selection and every reported path is relative to this root, so rules
+  read the same wherever the tests run from.
 
 - on_ambiguous:
 

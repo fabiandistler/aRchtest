@@ -49,7 +49,7 @@ constraints to the calls in the files that rule selects.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">arch_check</span><span class="op">(</span><span class="va">rules</span>, root <span class="op">=</span> <span class="st">"."</span>, on_ambiguous <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"report"</span>, <span class="st">"fail"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">arch_check</span><span class="op">(</span><span class="va">rules</span>, root <span class="op">=</span> <span class="cn">NULL</span>, on_ambiguous <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"report"</span>, <span class="st">"fail"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -62,8 +62,13 @@ unique, so every finding stays attributable to the rule that produced it.</p></d
 
 
 <dt id="arg-root">root<a class="anchor" aria-label="anchor" href="#arg-root"></a></dt>
-<dd><p>Path to the project root to analyse. Defaults to the working
-directory. All file selection and every reported path is relative to this
+<dd><p>Path to the project root to analyse, used as given. By default
+the root is found by walking up from the working directory to the nearest
+directory holding a <code>DESCRIPTION</code> or an <code>.Rproj</code> file, so a rule written in
+<code>tests/testthat/</code> analyses the project it lives in. Under <code>R CMD check</code>
+the copy of the package sources in <code>&lt;pkg&gt;.Rcheck/00_pkg_src/&lt;pkg&gt;</code> is used.
+With no such marker above the working directory, the working directory is
+the root. All file selection and every reported path is relative to this
 root, so rules read the same wherever the tests run from.</p></dd>
 
 
