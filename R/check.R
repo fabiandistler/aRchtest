@@ -214,11 +214,22 @@ arch_analyse <- function(root) {
 
   declared_index <- arch_symbol_index(setdiff(declared, arch_base_packages))
   base_index <- arch_symbol_index(arch_base_packages)
+  nested_all <- data.table::rbindlist(
+    c(
+      list(arch_empty_nested_defs()),
+      lapply(usable, function(p) p$nested_defs)
+    )
+  )
+  nested_index <- arch_nested_index(nested_all)
 
   list(
     project = project,
     sites = arch_resolve(
-      calls, arch_local_index(defs), declared_index$index, base_index$index
+      calls,
+      arch_local_index(defs),
+      declared_index$index,
+      base_index$index,
+      nested_index
     ),
     skipped = skipped,
     files_parsed = sum(ok),
