@@ -65,7 +65,9 @@ arch_package_methods <- c("namespace", "namespace_internal", "export", "base")
 #'   * `rules` -- one row per rule, with the number of files it selected,
 #'     whether its selector matched nothing, and how many violations it found.
 #'   * `selected_files` -- per rule, the files its selector matched.
-#'   * `counts` -- call sites seen, resolved, ambiguous and unresolved.
+#'   * `counts` -- call sites seen, resolved, ambiguous and unresolved. Value
+#'     passes of project functions are included in the seen and resolved
+#'     counts, so the numbers cover more than call syntax.
 #'   * `files_parsed`, `skipped_files` -- parse coverage.
 #'   * `declared_dependencies`, `unavailable_dependencies` -- resolution inputs.
 #'   * `root`, `is_package`, `on_ambiguous` -- how the check was scoped.

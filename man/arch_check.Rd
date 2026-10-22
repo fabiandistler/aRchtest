@@ -35,7 +35,9 @@ empty but has the same columns and types, never \code{NULL}.
 \item \code{rules} -- one row per rule, with the number of files it selected,
 whether its selector matched nothing, and how many violations it found.
 \item \code{selected_files} -- per rule, the files its selector matched.
-\item \code{counts} -- call sites seen, resolved, ambiguous and unresolved.
+\item \code{counts} -- call sites seen, resolved, ambiguous and unresolved. Value
+passes of project functions are included in the seen and resolved
+counts, so the numbers cover more than call syntax.
 \item \code{files_parsed}, \code{skipped_files} -- parse coverage.
 \item \code{declared_dependencies}, \code{unavailable_dependencies} -- resolution inputs.
 \item \code{root}, \code{is_package}, \code{on_ambiguous} -- how the check was scoped.

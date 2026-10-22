@@ -104,6 +104,11 @@ PARTIAL: 1 file(s) could not be parsed and were skipped: R/wip.R.
   This analysis is not complete.
 ```
 
+The site count includes function values passed as arguments: `lapply(x, helper)`
+counts as one site and is resolved when the module that defines `helper` is
+known, so reconciling the numbers against call syntax alone comes up a little
+short.
+
 If you see `DEGRADED` or `PARTIAL`, fix that before you believe a green check. A
 low resolved count means the same thing more quietly.
 
