@@ -102,6 +102,17 @@ test_that("a constraint without a selector errors at construction", {
   )
 })
 
+test_that("a rule without a selector errors when it is checked", {
+  expect_error(
+    arch_check(rule("no selector"), root = fixture("pkg_layered")),
+    "needs a selector first"
+  )
+  expect_error(
+    arch_check(rule("no selector"), root = fixture("pkg_layered")),
+    "arch_check"
+  )
+})
+
 test_that("a malformed argument vector errors at construction", {
   based <- rule("named rule") |> modules_matching("R/*.R")
 

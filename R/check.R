@@ -74,6 +74,13 @@ arch_check <- function(rules, root = NULL,
                        on_ambiguous = c("report", "fail")) {
   on_ambiguous <- match.arg(on_ambiguous)
   rules <- arch_as_rule_list(rules)
+  # A rule without a selector selects no file and can never produce a
+  # finding. The DSL already refuses to add a constraint to such a rule;
+  # checking one fails here with the same wording instead of reporting an
+  # empty selection that looks like a pass (issue #27).
+  for (rule in rules) {
+    arch_require_selector(rule, "arch_check", what = "check")
+  }
 
   analysis <- arch_analyse(root)
   sites <- analysis$sites
