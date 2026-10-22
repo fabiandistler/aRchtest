@@ -1,6 +1,6 @@
 # Changelog
 
-## aRchtest (development version)
+## aRchtest 0.2.0
 
 - [`must_not_depend_on()`](https://fabiandistler.github.io/aRchtest/reference/must_not_depend_on.md)
   now detects project functions that are passed as values:
@@ -9,7 +9,9 @@
   the module that defines `helper`, reported with
   `resolved_by = "value"`. A name that a local binding shadows stays out
   of the graph, and a base or imported function passed by value is not
-  tracked ([\#21](https://github.com/fabiandistler/aRchtest/issues/21)).
+  tracked. A use written with backticks resolves the same way, so a
+  non-syntactic name passed as a value such as `load.sales` is found
+  ([\#21](https://github.com/fabiandistler/aRchtest/issues/21)).
 - A rule without a selector is now rejected when it is checked, with the
   same “needs a selector first” wording the DSL uses when a constraint
   or an exclusion is added. Such a rule selects no file and can never
