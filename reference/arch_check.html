@@ -89,7 +89,9 @@ empty but has the same columns and types, never <code>NULL</code>.</p></li>
 <li><p><code>rules</code> – one row per rule, with the number of files it selected,
 whether its selector matched nothing, and how many violations it found.</p></li>
 <li><p><code>selected_files</code> – per rule, the files its selector matched.</p></li>
-<li><p><code>counts</code> – call sites seen, resolved, ambiguous and unresolved.</p></li>
+<li><p><code>counts</code> – call sites seen, resolved, ambiguous and unresolved. Value
+passes of project functions are included in the seen and resolved
+counts, so the numbers cover more than call syntax.</p></li>
 <li><p><code>files_parsed</code>, <code>skipped_files</code> – parse coverage.</p></li>
 <li><p><code>declared_dependencies</code>, <code>unavailable_dependencies</code> – resolution inputs.</p></li>
 <li><p><code>root</code>, <code>is_package</code>, <code>on_ambiguous</code> – how the check was scoped.</p></li>
@@ -113,6 +115,17 @@ unresolved bucket and the package is listed in <code>unavailable_dependencies</c
 <p>Read <code>counts</code> before trusting a clean result. A check that resolved little
 of what it saw proves little, and a degraded pass looks exactly like a clean
 project unless you look.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="resolving-function-values">Resolving function values<a class="anchor" aria-label="anchor" href="#resolving-function-values"></a></h2>
+    <p>A bare name passed to a call as an argument (<code>lapply(x, helper)</code>,
+<code>Filter(f, x)</code>, <code>formals(load_sales)</code>) is a dependency when it is not a
+variable of that scope. Such a site resolves as <code>"value"</code> when the name is
+defined by the project at top level; it is then attributable exactly like a
+call and counts in <code><a href="must_not_depend_on.html">must_not_depend_on()</a></code>. Passing a base or imported
+function by value (<code>lapply(x, sum)</code>) produces no edge, and looking a
+run-time function up dynamically (<code><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call()</a></code>, <code><a href="https://rdrr.io/r/base/get.html" class="external-link">get()</a></code>, <code><a href="https://rdrr.io/r/base/match.fun.html" class="external-link">match.fun()</a></code>)
+remains out of scope.</p>
     </div>
 
     <div class="section level2">

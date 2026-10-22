@@ -89,6 +89,7 @@ resolution: 41 of 44 call site(s) resolved, 0 ambiguous, 3 unresolved  (5 file(s
 <li>Exported by a base package — <code>base</code>, <code>methods</code>, <code>utils</code>, <code>stats</code>, <code>graphics</code>, <code>grDevices</code>, <code>datasets</code>, so <code>must_not_call(functions = "system")</code> fires.</li>
 <li>Otherwise unresolved — recorded and counted, never reported as a violation.</li>
 </ol>
+<p>Function <strong>values</strong> follow a narrower path. A bare name passed to a call as an argument — <code>lapply(cons, load_sales)</code>, <code>Reduce(load_sales, cons)</code>, <code>formals(load_sales)</code> — is a dependency when it is not a variable of that scope. It enters the graph only when the name is defined by the project at top level; then it is attributed to the defining module with <code>resolved_by = value</code> in the findings, and <code><a href="reference/must_not_depend_on.html">must_not_depend_on()</a></code> fires like it does for calls. Function objects read from base, imports or local bindings (<code>lapply(x, sum)</code>), and dynamic look-ups (<code><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call()</a></code>, <code><a href="https://rdrr.io/r/base/get.html" class="external-link">get()</a></code>, <code><a href="https://rdrr.io/r/base/match.fun.html" class="external-link">match.fun()</a></code>), stay out of the graph.</p>
 </div>
 <div class="section level2">
 <h2 id="read-the-resolution-counts">Read the resolution counts<a class="anchor" aria-label="anchor" href="#read-the-resolution-counts"></a>
@@ -103,6 +104,7 @@ DEGRADED: could not enumerate exports of RPostgres. Unqualified calls to these
   packages are NOT checked — install them and re-run before trusting a clean result.
 PARTIAL: 1 file(s) could not be parsed and were skipped: R/wip.R.
   This analysis is not complete.</code></pre>
+<p>The site count includes function values passed as arguments: <code>lapply(x, helper)</code> counts as one site and is resolved when the module that defines <code>helper</code> is known, so reconciling the numbers against call syntax alone comes up a little short.</p>
 <p>If you see <code>DEGRADED</code> or <code>PARTIAL</code>, fix that before you believe a green check. A low resolved count means the same thing more quietly.</p>
 </div>
 <div class="section level2">
@@ -159,7 +161,7 @@ pattern(s) R/*.R (excluding R/api_*.R) under root &lt;root&gt; (package).</code>
 <li>
 <strong>Dependency cycle detection</strong> between modules.</li>
 <li>
-<strong>Dynamic dispatch resolution</strong> — S4 generics and methods, R6 and reference class methods, and calls through <code><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call()</a></code>, <code><a href="https://rdrr.io/r/base/get.html" class="external-link">get()</a></code> or <code><a href="https://rdrr.io/r/base/match.fun.html" class="external-link">match.fun()</a></code>. These are recorded as unresolved rather than guessed at.</li>
+<strong>Dynamic dispatch resolution</strong> — S4 generics and methods, R6 and reference class methods, and calls through <code><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call()</a></code>, <code><a href="https://rdrr.io/r/base/get.html" class="external-link">get()</a></code> or <code><a href="https://rdrr.io/r/base/match.fun.html" class="external-link">match.fun()</a></code>. These are recorded as unresolved rather than guessed at. Static value passes of <em>project</em> functions (<code>lapply(x, helper)</code>) are covered; passing a base or imported function by value is not tracked.</li>
 <li><strong>Reverse-dependency and transitive analysis.</strong></li>
 <li>
 <strong>Non-R sources</strong> — Rmd/qmd chunks, <code>inst/</code> scripts, C/C++ via <code><a href="https://rdrr.io/r/base/CallExternal.html" class="external-link">.Call()</a></code>, JavaScript in Shiny.</li>

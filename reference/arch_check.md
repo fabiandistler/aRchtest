@@ -54,7 +54,9 @@ An `arch_result`: a list with
 
 - `selected_files` – per rule, the files its selector matched.
 
-- `counts` – call sites seen, resolved, ambiguous and unresolved.
+- `counts` – call sites seen, resolved, ambiguous and unresolved. Value
+  passes of project functions are included in the seen and resolved
+  counts, so the numbers cover more than call syntax.
 
 - `files_parsed`, `skipped_files` – parse coverage.
 
@@ -86,6 +88,21 @@ fall into the unresolved bucket and the package is listed in
 Read `counts` before trusting a clean result. A check that resolved
 little of what it saw proves little, and a degraded pass looks exactly
 like a clean project unless you look.
+
+## Resolving function values
+
+A bare name passed to a call as an argument (`lapply(x, helper)`,
+`Filter(f, x)`, `formals(load_sales)`) is a dependency when it is not a
+variable of that scope. Such a site resolves as `"value"` when the name
+is defined by the project at top level; it is then attributable exactly
+like a call and counts in
+[`must_not_depend_on()`](https://fabiandistler.github.io/aRchtest/reference/must_not_depend_on.md).
+Passing a base or imported function by value (`lapply(x, sum)`) produces
+no edge, and looking a run-time function up dynamically
+([`do.call()`](https://rdrr.io/r/base/do.call.html),
+[`get()`](https://rdrr.io/r/base/get.html),
+[`match.fun()`](https://rdrr.io/r/base/match.fun.html)) remains out of
+scope.
 
 ## Examples
 
