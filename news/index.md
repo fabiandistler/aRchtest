@@ -2,6 +2,12 @@
 
 ## aRchtest (development version)
 
+- A rule without a selector is now rejected when it is checked, with the
+  same “needs a selector first” wording the DSL uses when a constraint
+  or an exclusion is added. Such a rule selects no file and can never
+  produce a finding, so it failed with an internal error from the file
+  matcher instead of a message that says what to fix
+  ([\#27](https://github.com/fabiandistler/aRchtest/issues/27)).
 - [`modules_excluding()`](https://fabiandistler.github.io/aRchtest/reference/modules_excluding.md)
   subtracts files from a rule’s selection: the files a rule applies to
   are the union of its inclusion selectors minus the union of its

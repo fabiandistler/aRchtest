@@ -255,7 +255,7 @@ arch_check(
   root = app
 )
 #> <arch_result> 1 rule(s), 1 violation(s)
-#>   root: /tmp/RtmpAaaawK/shinyish (non-package)
+#>   root: /tmp/Rtmp9DGhHl/shinyish (non-package)
 #> 
 #> * modules must not compute statistics -- 1 file(s) selected, 1 violation(s)
 #>     R/mod_table.R:2:3  in mod_table_server()  median -> stats [base]  median(id)
