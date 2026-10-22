@@ -22,7 +22,8 @@ An \code{arch_rule} object.
 \code{rule()} opens a rule. A rule is inert data: building one performs no
 analysis, so rules are cheap to construct, can be stored in a list, and can
 be shared across tests. Add a selector with \code{\link[=modules_matching]{modules_matching()}} or
-\code{\link[=modules_matching_regex]{modules_matching_regex()}}, add a constraint with \code{\link[=must_not_call]{must_not_call()}} or
+\code{\link[=modules_matching_regex]{modules_matching_regex()}}, optionally subtract files with
+\code{\link[=modules_excluding]{modules_excluding()}}, add a constraint with \code{\link[=must_not_call]{must_not_call()}} or
 \code{\link[=must_not_depend_on]{must_not_depend_on()}}, and check it with \code{\link[=arch_check]{arch_check()}} or
 \code{\link[=arch_expect]{arch_expect()}}.
 }

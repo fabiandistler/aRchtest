@@ -36,7 +36,8 @@ segment. Everything else is literal. Reach for the regex variant only when a
 glob cannot express the selection -- a glob is easier for the next reader.
 
 Calling a selector more than once on the same rule widens the selection: a
-file is selected if it matches any of the rule's patterns.
+file is selected if it matches any of the rule's patterns. To remove files
+again, see \code{\link[=modules_excluding]{modules_excluding()}}.
 }
 \examples{
 rule("layering") |> modules_matching("R/ui_*.R")

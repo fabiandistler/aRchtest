@@ -3,7 +3,8 @@
 #' `rule()` opens a rule. A rule is inert data: building one performs no
 #' analysis, so rules are cheap to construct, can be stored in a list, and can
 #' be shared across tests. Add a selector with [modules_matching()] or
-#' [modules_matching_regex()], add a constraint with [must_not_call()] or
+#' [modules_matching_regex()], optionally subtract files with
+#' [modules_excluding()], add a constraint with [must_not_call()] or
 #' [must_not_depend_on()], and check it with [arch_check()] or
 #' [arch_expect()].
 #'
@@ -39,6 +40,7 @@ rule <- function(name, why = NULL) {
       name = name,
       why = why,
       selectors = list(),
+      exclusions = list(),
       constraints = list()
     ),
     class = "arch_rule"
@@ -59,7 +61,8 @@ rule <- function(name, why = NULL) {
 #' glob cannot express the selection -- a glob is easier for the next reader.
 #'
 #' Calling a selector more than once on the same rule widens the selection: a
-#' file is selected if it matches any of the rule's patterns.
+#' file is selected if it matches any of the rule's patterns. To remove files
+#' again, see [modules_excluding()].
 #'
 #' @param rule An `arch_rule` from [rule()].
 #' @param pattern A single glob pattern (`modules_matching()`) or regular
@@ -88,17 +91,63 @@ modules_matching_regex <- function(rule, pattern, ...) {
 arch_add_selector <- function(rule, pattern, type, ...) {
   arch_assert_rule(rule, "modules_matching")
   arch_reject_extra(rule, list(...), "modules_matching")
-  arch_assert_strings(pattern, "pattern", rule$name)
-  if (length(pattern) != 1L) {
-    stop(
-      "Rule '", rule$name, "': `pattern` must be a single string.",
-      call. = FALSE
-    )
-  }
+  arch_assert_pattern(rule, pattern)
 
   rule$selectors <- c(
     rule$selectors,
     list(list(type = type, pattern = pattern))
+  )
+  rule
+}
+
+#' Exclude files from a rule's selection
+#'
+#' `modules_excluding()` subtracts files from the selection a rule has so far:
+#' the files a rule applies to are the union of its inclusion selectors minus
+#' the union of its exclusion selectors. Use it for the boundary a positive
+#' constraint cannot yet state: "only the API layer may call httr" cannot be
+#' listed out loud, but "every file except the API layer must not call httr"
+#' says the same thing as a negative constraint over a selection that keeps
+#' `R/api_*.R` out.
+#'
+#' The pattern is a single glob, translated like [modules_matching()] does, and
+#' matched against paths relative to the project root. Call it after at least
+#' one inclusion selector, and more than once to exempt several patterns: the
+#' exclusions combine, they never narrow each other.
+#'
+#' An exclusion that removes every selected file fails the check rather than
+#' letting the rule pass vacuously; the EMPTY SELECTION message names both the
+#' inclusion and the exclusion patterns (see [arch_check()]).
+#'
+#' @param rule An `arch_rule` from [rule()] that already has a selector.
+#' @param pattern A single glob pattern naming the modules the rule must not
+#'   cover, matched against file paths relative to the project root.
+#' @param ... Not used. Present so a misspelled argument errors here rather
+#'   than surfacing later as a confusing check result.
+#'
+#' @return The rule, with the exclusion attached.
+#' @seealso [modules_matching()] to add files to the selection.
+#' @export
+#'
+#' @examples
+#' rule("only the API layer talks HTTP") |>
+#'   modules_matching("R/*.R") |>
+#'   modules_excluding("R/api_*.R") |>
+#'   must_not_call(packages = "httr")
+#'
+#' rule("everything but the sync job stays local") |>
+#'   modules_matching("R/*.R") |>
+#'   modules_excluding("R/sync_*.R") |>
+#'   must_not_depend_on(modules = "R/infra_*.R")
+modules_excluding <- function(rule, pattern, ...) {
+  arch_assert_rule(rule, "modules_excluding")
+  arch_reject_extra(rule, list(...), "modules_excluding")
+  arch_require_selector(rule, "modules_excluding", what = "exclusion")
+  arch_assert_pattern(rule, pattern)
+
+  rule$exclusions <- c(
+    rule$exclusions,
+    list(list(type = "glob", pattern = pattern))
   )
   rule
 }
@@ -240,6 +289,11 @@ print.arch_rule <- function(x, ...) {
   } else {
     cat("  selects: <no selector yet>\n")
   }
+  for (exclusion in x$exclusions) {
+    cat(
+      "  excludes: ", exclusion$pattern, " (", exclusion$type, ")\n", sep = ""
+    )
+  }
   for (constraint in x$constraints) {
     if (identical(constraint$type, "must_not_call")) {
       if (length(constraint$packages)) {
@@ -277,12 +331,12 @@ arch_assert_rule <- function(rule, verb) {
   invisible(rule)
 }
 
-arch_require_selector <- function(rule, verb) {
+arch_require_selector <- function(rule, verb, what = "constraint") {
   if (!length(rule$selectors)) {
     stop(
       "Rule '", rule$name, "': ", verb,
       "() needs a selector first -- add modules_matching() ",
-      "or modules_matching_regex() before the constraint.",
+      "or modules_matching_regex() before the ", what, ".",
       call. = FALSE
     )
   }
@@ -305,6 +359,17 @@ arch_reject_extra <- function(rule, extra, verb) {
     ". Check the spelling against ?", verb, ".",
     call. = FALSE
   )
+}
+
+arch_assert_pattern <- function(rule, pattern) {
+  arch_assert_strings(pattern, "pattern", rule$name)
+  if (length(pattern) != 1L) {
+    stop(
+      "Rule '", rule$name, "': `pattern` must be a single string.",
+      call. = FALSE
+    )
+  }
+  invisible(pattern)
 }
 
 arch_assert_strings <- function(x, argument, rule_name) {
@@ -364,7 +429,9 @@ arch_glob_to_regex <- function(pattern) {
 
 arch_match_files <- function(files, pattern, type) {
   regex <- if (identical(type, "glob")) arch_glob_to_regex(pattern) else pattern
-  files[grepl(regex, files)]
+  # perl = TRUE: the regex variant accepts lookahead. TRE cannot express
+  # "^R/(?!api_).*\\.R$", and converted globs are PCRE-safe by construction.
+  files[grepl(regex, files, perl = TRUE)]
 }
 
 arch_select_files <- function(files, selectors) {

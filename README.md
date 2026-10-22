@@ -121,6 +121,40 @@ works under `devtools::test()`, `testthat::test_local()` and `R CMD check`
 `<pkg>.Rcheck/00_pkg_src/`). Pass `root` to analyse another directory; an
 explicit `root` is used as given.
 
+## Exclude the exception from the selection
+
+Some boundaries are really "everything except X". "Only the API layer may call
+httr" cannot be listed out loud today, but the same boundary reads as a
+negative constraint: every file except the API layer must not call httr.
+`modules_excluding()` subtracts the exempted files from a selection:
+
+```r
+rule("only the API layer talks HTTP") |>
+  modules_matching("R/*.R") |>
+  modules_excluding("R/api_*.R") |>
+  must_not_call(packages = "httr") |>
+  arch_expect()
+```
+
+Because the rule keeps matching `R/*.R`, a new `R/sync.R` falls inside it and
+is checked automatically — only the exceptions are listed, so the list does not
+go stale as `R/` grows. Exclusions combine when the verb is called more than
+once, and the check result and the rule's summary both list them, so a reader
+sees what was left out.
+
+A regex selector can express the same subtraction inline, because file matching
+now uses PCRE and lookahead is available:
+`modules_matching_regex("^R/(?!api_).*\\.R$")`. The glob plus
+`modules_excluding()` is usually easier for the next reader.
+
+If the exemptions remove every selected file, the rule fails instead of passing
+vacuously, and the message names both pattern sets:
+
+```
+EMPTY SELECTION: rule 'only the API layer talks HTTP' selected no file with
+pattern(s) R/*.R (excluding R/api_*.R) under root <root> (package).
+```
+
 ## A rule that selects nothing fails
 
 A vacuously green architecture test is worse than no test at all, so a selector
