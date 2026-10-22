@@ -160,10 +160,16 @@ arch_format_rule <- function(x, i) {
 }
 
 arch_empty_selection_text <- function(x, name) {
-  patterns <- x$rules$patterns[match(name, x$rules$rule)]
+  row <- match(name, x$rules$rule)
+  excluded <- x$rules$exclusions[row]
+  subtracted <- if (is.na(excluded) || !nzchar(excluded)) {
+    ""
+  } else {
+    paste0(" (excluding ", excluded, ")")
+  }
   paste0(
     "EMPTY SELECTION: rule '", name, "' selected no file with pattern(s) ",
-    patterns, " under root ", x$root,
+    x$rules$patterns[row], subtracted, " under root ", x$root,
     if (x$is_package) " (package)" else " (non-package)",
     ". A rule that selects nothing cannot pass -- fix the pattern, ",
     "or pass `root` if this is not the project root."

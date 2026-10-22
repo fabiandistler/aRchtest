@@ -1,3 +1,16 @@
+# aRchtest (development version)
+
+* `modules_excluding()` subtracts files from a rule's selection: the files a
+  rule applies to are the union of its inclusion selectors minus the union of
+  its exclusion selectors, so "only the API layer may call httr" can be written
+  as `modules_matching("R/*.R")`, `modules_excluding("R/api_*.R")` and
+  `must_not_call(packages = "httr")`. Exclusions combine, the check result and
+  the rule's formatted output list them, and an exclusion that removes every
+  selected file fails with EMPTY SELECTION naming both pattern sets (#24).
+* File matching now uses PCRE (`perl = TRUE`) instead of TRE, so
+  `modules_matching_regex()` accepts lookahead assertions such as
+  `^R/(?!api_).*\\.R$` (#24).
+
 # aRchtest 0.1.0
 
 Initial release. `aRchtest` declares architectural boundaries between the

@@ -115,6 +115,14 @@ arch_check <- function(rules, root = NULL,
       },
       character(1)
     ),
+    exclusions = vapply(
+      rules,
+      function(r) {
+        excluded <- vapply(r$exclusions, function(s) s$pattern, character(1))
+        paste(excluded, collapse = ", ")
+      },
+      character(1)
+    ),
     n_files = vapply(selected_files, length, integer(1), USE.NAMES = FALSE),
     empty_selection = empty_selection,
     n_violations = n_violations
@@ -238,6 +246,10 @@ arch_counts <- function(sites) {
 
 arch_evaluate_rule <- function(rule, sites, files, on_ambiguous) {
   selected <- arch_select_files(files, rule$selectors)
+  if (length(rule$exclusions)) {
+    excluded <- arch_select_files(selected, rule$exclusions)
+    selected <- setdiff(selected, excluded)
+  }
 
   if (!length(selected)) {
     return(list(
