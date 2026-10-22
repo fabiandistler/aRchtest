@@ -276,10 +276,12 @@ arch_first_argument_id <- function(call_id, function_expr_id, nav) {
 # a lambda or a control flow statement creates its own nesting or position,
 # `pkg::` and `pkg:::` qualification turns the use into a qualified call that
 # the namespace path owns, `$`/`@` mean the name selects a subelement rather
-# than naming a value, and an assignment token means the name is written,
-# not read. Named arguments inside a call use the parser's EQ_SUB token instead
-# of EQ_ASSIGN, so a value set in a named argument stays readable and reaches
-# the call below it.
+# than naming a value, and an assignment token excludes the surrounding
+# assignment expression outright. A use on the right-hand side of
+# `default_handler <- helper` is read at run time, but it is not an argument
+# of any call, so it sits outside value handling. Named arguments inside a
+# call use the parser's EQ_SUB token instead of EQ_ASSIGN, so a value set in
+# a named argument stays readable and reaches the call below it.
 arch_value_dirty_tokens <- c(
   "FUNCTION", "IF", "WHILE", "FOR", "NS_GET", "NS_GET_INT",
   "'$'", "'@'", "LEFT_ASSIGN", "EQ_ASSIGN", "RIGHT_ASSIGN"
@@ -343,7 +345,12 @@ arch_assigned_name <- function(assign_row, nav) {
 # definition index records, and reading its value as a shadow would suppress
 # the file's own edges. Top-level for-loop variables are kept (scope 0),
 # because after the loop runs they hold whatever it iterated over, not a
-# function.
+# function. Two approximations follow from keying bindings on the nearest
+# function scope: a use inside `local()`/`with()`/`evalq()` is shadowed by
+# the binding although run time reads it from the inner environment first,
+# and a top-level for-loop variable shadows the name for the whole file,
+# including statements before the loop. The parse tree has no environment
+# chain and no file position for either, so the shadow stays approximate.
 arch_local_binding_table <- function(pd, nav, scope_keys) {
   empty <- data.table::data.table(name = character(), scope = integer())
 
@@ -466,7 +473,10 @@ arch_value_uses <- function(pd, nav, def_names, lines, rel_path) {
   bindings <- arch_local_binding_table(pd, nav, scope_keys)
 
   use_rows <- rows[which(vapply(rows, function(row) {
-    symbol <- pd$text[row]
+    # A symbol written with quotes or backticks carries them in pd$text;
+    # shadows and definitions live on the bare name, so both must be
+    # compared after unquoting.
+    symbol <- arch_unquote(pd$text[row])
     # No binding anywhere in the file with this name: nothing can shadow it.
     if (!any(bindings$name == symbol)) {
       return(TRUE)
@@ -487,7 +497,7 @@ arch_value_uses <- function(pd, nav, def_names, lines, rel_path) {
   out_symbol <- character(n)
   for (i in seq_len(n)) {
     row <- use_rows[i]
-    out_symbol[i] <- pd$text[row]
+    out_symbol[i] <- arch_unquote(pd$text[row])
     call_id <- arch_value_use_call(row, nav)
     out_anchor[i] <- if (is.na(call_id)) 0L else call_id
   }

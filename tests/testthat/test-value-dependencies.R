@@ -120,6 +120,99 @@ test_that("a named argument value is also a value edge", {
   expect_equal(result$violations$source_text, "switch(type, pass = load_sales)")
 })
 
+test_that("backticked and quoted symbol uses match shadows and definitions", {
+  root <- withr::local_tempdir()
+  dir.create(file.path(root, "R"))
+  writeLines(
+    c(
+      "load_sales <- function(con) 1",
+      "`load.sales.alt` <- function(x) 2"
+    ),
+    file.path(root, "R", "db.R")
+  )
+  writeLines(
+    c(
+      "bt_probe <- function(x) {",
+      "  k <- lapply(x, `load.sales.alt`)",
+      "  p <- sapply(x, `load_sales`)",
+      "  list(k, p)",
+      "}"
+    ),
+    file.path(root, "R", "bt.R")
+  )
+
+  result <- arch_check(
+    rule("backtick does not depend on db") |>
+      modules_matching("R/bt.R") |>
+      must_not_depend_on(modules = "R/db.R"),
+    root = root
+  )
+
+  expect_equal(nrow(result$violations), 2L)
+  expect_equal(
+    sort(result$violations$callee),
+    sort(c("load.sales.alt", "load_sales"))
+  )
+  expect_true(all(result$violations$resolved_by == "value"))
+  expect_equal(
+    sort(result$violations$source_text),
+    sort(c("lapply(x, `load.sales.alt`)", "sapply(x, `load_sales`)"))
+  )
+})
+
+test_that("member reads and lambda bodies keep the value out", {
+  root <- withr::local_tempdir()
+  dir.create(file.path(root, "R"))
+  writeLines("load_sales <- function(con) 1", file.path(root, "R", "db.R"))
+  writeLines(
+    c(
+      "mem_probe <- function(obj) {",
+      "  d <- invisible(obj$load_sales)",
+      "  d",
+      "}",
+      "lam_probe <- function(x) {",
+      "  k <- lapply(x, function(y) load_sales)",
+      "  k",
+      "}"
+    ),
+    file.path(root, "R", "parts.R")
+  )
+
+  result <- arch_check(
+    rule("parts does not depend on db") |>
+      modules_matching("R/parts.R") |>
+      must_not_depend_on(modules = "R/db.R"),
+    root = root
+  )
+
+  expect_equal(nrow(result$violations), 0L)
+})
+
+test_that("a formula body inside a call argument is a value use", {
+  root <- withr::local_tempdir()
+  dir.create(file.path(root, "R"))
+  writeLines("load_sales <- function(con) 1", file.path(root, "R", "db.R"))
+  writeLines(
+    "frm_probe <- function(x) purrr::map(x, ~ .x + load_sales)",
+    file.path(root, "R", "frm.R")
+  )
+
+  result <- arch_check(
+    rule("frm does not depend on db") |>
+      modules_matching("R/frm.R") |>
+      must_not_depend_on(modules = "R/db.R"),
+    root = root
+  )
+
+  expect_equal(nrow(result$violations), 1L)
+  expect_equal(result$violations$callee, "load_sales")
+  expect_true(all(result$violations$resolved_by == "value"))
+  expect_equal(
+    result$violations$source_text,
+    "purrr::map(x, ~ .x + load_sales)"
+  )
+})
+
 test_that("without a shadowing binding the value edge appears", {
   result <- arch_check(
     rule("direct does not depend on db") |>
