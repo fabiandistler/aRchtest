@@ -257,10 +257,8 @@ arch_counts <- function(sites) {
 
 arch_evaluate_rule <- function(rule, sites, files, on_ambiguous) {
   selected <- arch_select_files(files, rule$selectors)
-  if (length(rule$exclusions)) {
-    excluded <- arch_select_files(selected, rule$exclusions)
-    selected <- setdiff(selected, excluded)
-  }
+  excluded <- arch_select_files(selected, rule$exclusions)
+  selected <- setdiff(selected, excluded)
 
   if (!length(selected)) {
     return(list(

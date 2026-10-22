@@ -1,5 +1,9 @@
 # aRchtest (development version)
 
+* `arch_select_files()` now returns an empty selection for an empty selector
+  list instead of erroring in `unique(NULL)`. A rule without exclusion
+  selectors no longer needs a guard around the exclusion step, so the
+  exclusion path and the plain path behave the same way (#27).
 * `modules_excluding()` subtracts files from a rule's selection: the files a
   rule applies to are the union of its inclusion selectors minus the union of
   its exclusion selectors, so "only the API layer may call httr" can be written
