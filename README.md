@@ -73,6 +73,16 @@ Calls are attributed in this order:
    `grDevices`, `datasets`, so `must_not_call(functions = "system")` fires.
 5. Otherwise unresolved — recorded and counted, never reported as a violation.
 
+Function **values** follow a narrower path. A bare name passed to a call as an
+argument — `lapply(cons, load_sales)`, `Reduce(load_sales, cons)`,
+`formals(load_sales)` — is a dependency when it is not a variable of that
+scope. It enters the graph only when the name is defined by the project at top
+level; then it is attributed to the defining module with
+`resolved_by = value` in the findings, and `must_not_depend_on()` fires like
+it does for calls. Function objects read from base, imports or local bindings
+(`lapply(x, sum)`), and dynamic look-ups (`do.call()`, `get()`, `match.fun()`),
+stay out of the graph.
+
 ## Read the resolution counts
 
 > **Dependency packages must be installed** for unqualified calls to be resolved.
@@ -183,7 +193,9 @@ By design, out of scope for now:
 - **Dependency cycle detection** between modules.
 - **Dynamic dispatch resolution** — S4 generics and methods, R6 and reference
   class methods, and calls through `do.call()`, `get()` or `match.fun()`. These
-  are recorded as unresolved rather than guessed at.
+  are recorded as unresolved rather than guessed at. Static value passes of
+  *project* functions (`lapply(x, helper)`) are covered; passing a base or
+  imported function by value is not tracked.
 - **Reverse-dependency and transitive analysis.**
 - **Non-R sources** — Rmd/qmd chunks, `inst/` scripts, C/C++ via `.Call()`,
   JavaScript in Shiny.

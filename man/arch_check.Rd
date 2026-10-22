@@ -68,6 +68,17 @@ of what it saw proves little, and a degraded pass looks exactly like a clean
 project unless you look.
 }
 
+\section{Resolving function values}{
+A bare name passed to a call as an argument (\code{lapply(x, helper)},
+\code{Filter(f, x)}, \code{formals(load_sales)}) is a dependency when it is not a
+variable of that scope. Such a site resolves as \code{"value"} when the name is
+defined by the project at top level; it is then attributable exactly like a
+call and counts in \code{must_not_depend_on()}. Passing a base or imported
+function by value (\code{lapply(x, sum)}) produces no edge, and looking a
+run-time function up dynamically (\code{do.call()}, \code{get()}, \code{match.fun()})
+remains out of scope.
+}
+
 \examples{
 project <- system.file("examples", "layered", package = "aRchtest")
 
