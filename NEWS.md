@@ -1,5 +1,10 @@
 # aRchtest (development version)
 
+* A rule without a selector is now rejected when it is checked, with the same
+  "needs a selector first" wording the DSL uses when a constraint or an
+  exclusion is added. Such a rule selects no file and can never produce a
+  finding, so it failed with an internal error from the file matcher instead
+  of a message that says what to fix (#27).
 * `modules_excluding()` subtracts files from a rule's selection: the files a
   rule applies to are the union of its inclusion selectors minus the union of
   its exclusion selectors, so "only the API layer may call httr" can be written

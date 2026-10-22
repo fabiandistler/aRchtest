@@ -149,6 +149,24 @@ test_that("an exclusion verb applied to something that is not a rule errors", {
   expect_error(modules_excluding("not a rule", "R/api_*.R"), "rule\\(\\)")
 })
 
+test_that("an empty selector list selects nothing instead of erroring", {
+  expect_equal(arch_select_files(character(), list()), character())
+  expect_equal(
+    arch_select_files(c("R/ui_main.R"), list()),
+    character()
+  )
+})
+
+test_that("a rule without exclusions still selects its files", {
+  result <- arch_check(ui_rule(), root = fixture("pkg_layered"))
+
+  expect_equal(
+    result$selected_files[["UI must not use tools"]],
+    c("R/ui_dashboard.R", "R/ui_report.R")
+  )
+  expect_equal(result$rules$n_files, 2L)
+})
+
 test_that("a rule prints its exclusions", {
   built <- confinement_rule(why = "Only the client knows the wire format")
 

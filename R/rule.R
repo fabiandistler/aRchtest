@@ -435,6 +435,13 @@ arch_match_files <- function(files, pattern, type) {
 }
 
 arch_select_files <- function(files, selectors) {
+  # An empty selector list selects nothing. Without this early return
+  # `unlist(list())` is NULL and `unique(NULL)` errors, so the zero-selector
+  # state of a rule (no inclusion yet, no exclusion at all) would crash
+  # instead of selecting an empty set (issue #27).
+  if (!length(selectors)) {
+    return(character())
+  }
   matched <- unlist(
     lapply(selectors, function(s) arch_match_files(files, s$pattern, s$type)),
     use.names = FALSE
