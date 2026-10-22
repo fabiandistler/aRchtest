@@ -119,6 +119,22 @@ PARTIAL: 1 file(s) could not be parsed and were skipped: R/wip.R.
 <p>Put the rule in any file under <code>tests/testthat/</code> and leave <code>root</code> out. The check walks up from the working directory to the nearest directory holding a <code>DESCRIPTION</code> or an <code>.Rproj</code> file and analyses that project, so the same test works under <code>devtools::test()</code>, <code><a href="https://testthat.r-lib.org/reference/test_package.html" class="external-link">testthat::test_local()</a></code> and <code>R CMD check</code> (where it reads the package sources that <code>R CMD check</code> keeps in <code>&lt;pkg&gt;.Rcheck/00_pkg_src/</code>). Pass <code>root</code> to analyse another directory; an explicit <code>root</code> is used as given.</p>
 </div>
 <div class="section level2">
+<h2 id="exclude-the-exception-from-the-selection">Exclude the exception from the selection<a class="anchor" aria-label="anchor" href="#exclude-the-exception-from-the-selection"></a>
+</h2>
+<p>Some boundaries are really “everything except X”. “Only the API layer may call httr” cannot be listed out loud today, but the same boundary reads as a negative constraint: every file except the API layer must not call httr. <code><a href="reference/modules_excluding.html">modules_excluding()</a></code> subtracts the exempted files from a selection:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/rule.html">rule</a></span><span class="op">(</span><span class="st">"only the API layer talks HTTP"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/modules_matching.html">modules_matching</a></span><span class="op">(</span><span class="st">"R/*.R"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/modules_excluding.html">modules_excluding</a></span><span class="op">(</span><span class="st">"R/api_*.R"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/must_not_call.html">must_not_call</a></span><span class="op">(</span>packages <span class="op">=</span> <span class="st">"httr"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/arch_expect.html">arch_expect</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>Because the rule keeps matching <code>R/*.R</code>, a new <code>R/sync.R</code> falls inside it and is checked automatically — only the exceptions are listed, so the list does not go stale as <code>R/</code> grows. Exclusions combine when the verb is called more than once, and the check result and the rule’s summary both list them, so a reader sees what was left out.</p>
+<p>A regex selector can express the same subtraction inline, because file matching now uses PCRE and lookahead is available: <code>modules_matching_regex("^R/(?!api_).*\\.R$")</code>. The glob plus <code><a href="reference/modules_excluding.html">modules_excluding()</a></code> is usually easier for the next reader.</p>
+<p>If the exemptions remove every selected file, the rule fails instead of passing vacuously, and the message names both pattern sets:</p>
+<pre><code>EMPTY SELECTION: rule 'only the API layer talks HTTP' selected no file with
+pattern(s) R/*.R (excluding R/api_*.R) under root &lt;root&gt; (package).</code></pre>
+</div>
+<div class="section level2">
 <h2 id="a-rule-that-selects-nothing-fails">A rule that selects nothing fails<a class="anchor" aria-label="anchor" href="#a-rule-that-selects-nothing-fails"></a>
 </h2>
 <p>A vacuously green architecture test is worse than no test at all, so a selector that matches no file fails the check with a distinct message naming the rule, the pattern and the root it was checked against.</p>
@@ -126,7 +142,7 @@ PARTIAL: 1 file(s) could not be parsed and were skipped: R/wip.R.
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"fabiandistler/aRchtest"</span><span class="op">)</span></span></code></pre></div>
 <p>Add it to your project’s <code>Suggests</code>, alongside <code>testthat</code>.</p>

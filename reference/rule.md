@@ -6,6 +6,8 @@ can be shared across tests. Add a selector with
 [`modules_matching()`](https://fabiandistler.github.io/aRchtest/reference/modules_matching.md)
 or
 [`modules_matching_regex()`](https://fabiandistler.github.io/aRchtest/reference/modules_matching.md),
+optionally subtract files with
+[`modules_excluding()`](https://fabiandistler.github.io/aRchtest/reference/modules_excluding.md),
 add a constraint with
 [`must_not_call()`](https://fabiandistler.github.io/aRchtest/reference/must_not_call.md)
 or

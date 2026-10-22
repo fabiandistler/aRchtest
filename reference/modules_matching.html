@@ -38,7 +38,7 @@ from."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Select the modules a rule applies to</h1>
-      <small class="dont-index">Source: <a href="https://github.com/fabiandistler/aRchtest/blob/v0.1.0/R/rule.R" class="external-link"><code>R/rule.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/fabiandistler/aRchtest/blob/main/R/rule.R" class="external-link"><code>R/rule.R</code></a></small>
       <div class="d-none name"><code>modules_matching.Rd</code></div>
     </div>
 
@@ -87,7 +87,8 @@ matches across segments, and <code>?</code> matches a single character within a
 segment. Everything else is literal. Reach for the regex variant only when a
 glob cannot express the selection – a glob is easier for the next reader.</p>
 <p>Calling a selector more than once on the same rule widens the selection: a
-file is selected if it matches any of the rule's patterns.</p>
+file is selected if it matches any of the rule's patterns. To remove files
+again, see <code><a href="modules_excluding.html">modules_excluding()</a></code>.</p>
     </div>
 
     <div class="section level2">

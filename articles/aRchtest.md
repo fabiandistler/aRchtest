@@ -213,10 +213,10 @@ architecture <- list(
 
 combined <- arch_check(architecture, root = project)
 combined$rules
-#>                                    rule    why     patterns n_files
-#>                                  <char> <char>       <char>   <int>
-#> 1:       UI must not compute statistics   <NA>     R/ui_*.R       1
-#> 2: domain must not reach infrastructure   <NA> R/domain_*.R       1
+#>                                    rule    why     patterns exclusions n_files
+#>                                  <char> <char>       <char>     <char>   <int>
+#> 1:       UI must not compute statistics   <NA>     R/ui_*.R                  1
+#> 2: domain must not reach infrastructure   <NA> R/domain_*.R                  1
 #>    empty_selection n_violations
 #>             <lgcl>        <int>
 #> 1:           FALSE            1
@@ -255,7 +255,7 @@ arch_check(
   root = app
 )
 #> <arch_result> 1 rule(s), 1 violation(s)
-#>   root: /tmp/RtmpQorJjV/shinyish (non-package)
+#>   root: /tmp/Rtmp5TAMb3/shinyish (non-package)
 #> 
 #> * modules must not compute statistics -- 1 file(s) selected, 1 violation(s)
 #>     R/mod_table.R:2:3  in mod_table_server()  median -> stats [base]  median(id)

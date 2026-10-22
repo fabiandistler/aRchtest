@@ -10,6 +10,8 @@
   : The violations a check found
 - [`format(`*`<arch_result>`*`)`](https://fabiandistler.github.io/aRchtest/reference/format.arch_result.md)
   : Format a check result
+- [`modules_excluding()`](https://fabiandistler.github.io/aRchtest/reference/modules_excluding.md)
+  : Exclude files from a rule's selection
 - [`modules_matching()`](https://fabiandistler.github.io/aRchtest/reference/modules_matching.md)
   [`modules_matching_regex()`](https://fabiandistler.github.io/aRchtest/reference/modules_matching.md)
   : Select the modules a rule applies to

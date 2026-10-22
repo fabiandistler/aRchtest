@@ -54,7 +54,7 @@
       <h1>Declaring and enforcing an architecture</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/fabiandistler/aRchtest/blob/v0.1.0/vignettes/aRchtest.Rmd" class="external-link"><code>vignettes/aRchtest.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/fabiandistler/aRchtest/blob/main/vignettes/aRchtest.Rmd" class="external-link"><code>vignettes/aRchtest.Rmd</code></a></small>
       <div class="d-none name"><code>aRchtest.Rmd</code></div>
     </div>
 
@@ -298,10 +298,10 @@ check:</p>
 <span></span>
 <span><span class="va">combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/arch_check.html">arch_check</a></span><span class="op">(</span><span class="va">architecture</span>, root <span class="op">=</span> <span class="va">project</span><span class="op">)</span></span>
 <span><span class="va">combined</span><span class="op">$</span><span class="va">rules</span></span>
-<span><span class="co">#&gt;                                    rule    why     patterns n_files</span></span>
-<span><span class="co">#&gt;                                  &lt;char&gt; &lt;char&gt;       &lt;char&gt;   &lt;int&gt;</span></span>
-<span><span class="co">#&gt; 1:       UI must not compute statistics   &lt;NA&gt;     R/ui_*.R       1</span></span>
-<span><span class="co">#&gt; 2: domain must not reach infrastructure   &lt;NA&gt; R/domain_*.R       1</span></span>
+<span><span class="co">#&gt;                                    rule    why     patterns exclusions n_files</span></span>
+<span><span class="co">#&gt;                                  &lt;char&gt; &lt;char&gt;       &lt;char&gt;     &lt;char&gt;   &lt;int&gt;</span></span>
+<span><span class="co">#&gt; 1:       UI must not compute statistics   &lt;NA&gt;     R/ui_*.R                  1</span></span>
+<span><span class="co">#&gt; 2: domain must not reach infrastructure   &lt;NA&gt; R/domain_*.R                  1</span></span>
 <span><span class="co">#&gt;    empty_selection n_violations</span></span>
 <span><span class="co">#&gt;             &lt;lgcl&gt;        &lt;int&gt;</span></span>
 <span><span class="co">#&gt; 1:           FALSE            1</span></span>
@@ -336,7 +336,7 @@ project’s own source instead:</p>
 <span>  root <span class="op">=</span> <span class="va">app</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;arch_result&gt; 1 rule(s), 1 violation(s)</span></span>
-<span><span class="co">#&gt;   root: /tmp/RtmpQorJjV/shinyish (non-package)</span></span>
+<span><span class="co">#&gt;   root: /tmp/Rtmp5TAMb3/shinyish (non-package)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; * modules must not compute statistics -- 1 file(s) selected, 1 violation(s)</span></span>
 <span><span class="co">#&gt;     R/mod_table.R:2:3  in mod_table_server()  median -&gt; stats [base]  median(id)</span></span>

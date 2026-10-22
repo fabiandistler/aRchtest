@@ -45,7 +45,9 @@ when a glob cannot express the selection – a glob is easier for the next
 reader.
 
 Calling a selector more than once on the same rule widens the selection:
-a file is selected if it matches any of the rule's patterns.
+a file is selected if it matches any of the rule's patterns. To remove
+files again, see
+[`modules_excluding()`](https://fabiandistler.github.io/aRchtest/reference/modules_excluding.md).
 
 ## Examples
 

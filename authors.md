@@ -7,7 +7,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/fabiandistler/aRchtest/blob/v0.1.0/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/fabiandistler/aRchtest/blob/main/DESCRIPTION)
 
 Distler F (2026). *aRchtest: Declare and Enforce Architectural Rules in
 'testthat'*. R package version 0.1.0,
