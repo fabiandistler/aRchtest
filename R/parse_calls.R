@@ -19,12 +19,21 @@ arch_empty_defs <- function() {
   data.table::data.table(file = character(), name = character())
 }
 
+arch_empty_nested_defs <- function() {
+  data.table::data.table(
+    file = character(),
+    scope = character(),
+    symbol = character()
+  )
+}
+
 arch_parse_file <- function(abs_path, rel_path) {
   blank <- list(
     ok = TRUE,
     reason = NA_character_,
     calls = arch_empty_calls(),
     defs = arch_empty_defs(),
+    nested_defs = arch_empty_nested_defs(),
     libraries = character()
   )
 
@@ -38,6 +47,7 @@ arch_parse_file <- function(abs_path, rel_path) {
       reason = conditionMessage(exprs),
       calls = arch_empty_calls(),
       defs = arch_empty_defs(),
+      nested_defs = arch_empty_nested_defs(),
       libraries = character()
     ))
   }
@@ -56,6 +66,13 @@ arch_parse_file <- function(abs_path, rel_path) {
   defs <- arch_function_definitions(pd, nav)
   calls <- arch_call_sites(pd, nav, defs$names, lines, rel_path)
 
+  nested <- defs$nested[!is.na(defs$nested$scope), ]
+  nested_defs <- data.table::data.table(
+    file = rep(rel_path, nrow(nested)),
+    scope = nested$scope,
+    symbol = nested$symbol
+  )
+
   list(
     ok = TRUE,
     reason = NA_character_,
@@ -64,6 +81,7 @@ arch_parse_file <- function(abs_path, rel_path) {
       file = rep(rel_path, length(defs$defined)),
       name = defs$defined
     ),
+    nested_defs = nested_defs,
     libraries = arch_library_calls(pd, nav)
   )
 }
@@ -101,10 +119,63 @@ arch_function_definitions <- function(pd, nav) {
   )
   names(named) <- as.character(def_ids)
 
-  list(
-    names = named,
-    defined = sort(unique(named[!is.na(named)]), method = "radix")
+  named_ok <- !is.na(named)
+  top_level <- vapply(
+    def_ids, function(d) arch_def_is_top_level(d, nav), logical(1)
   )
+  names(top_level) <- as.character(def_ids)
+
+  enclosing <- vapply(
+    def_ids[named_ok], function(d) arch_enclosing_function(d, nav, named),
+    character(1)
+  )
+  not_top <- !top_level[named_ok]
+  nested <- data.table::data.table(
+    scope = enclosing[not_top],
+    symbol = named[named_ok][not_top]
+  )
+
+  list(
+    # `names` keeps every named definition, nested or not: it locates the
+    # function a call sits in. `defined` feeds the project-wide index and
+    # therefore must hold top-level definitions only -- a nested `all <-
+    # function(...)` inside build_site() would otherwise shadow every
+    # `all()` call in the whole project (see issue #20). `nested` records
+    # where nested definitions live, so their calls stay attributable
+    # inside their enclosing function.
+    names = named,
+    defined = sort(unique(named[named_ok & top_level]), method = "radix"),
+    nested = nested
+  )
+}
+
+# A definition is top level when the expression that assigns the function is
+# a statement of the file itself, optionally wrapped once in braces (braces
+# do not create a scope in R). The walk from the assignment expression may
+# therefore take at most two hops to reach the file root (the expr whose own
+# parent id is 0), and the holding statement must not be an `if`, `while` or
+# `for` statement, because a definition reached like that may never run and
+# must not claim ownership across the project.
+arch_def_is_top_level <- function(def_id, nav) {
+  pd <- nav$pd
+  r_def <- arch_row_of(nav, def_id)
+  if (is.na(r_def)) {
+    return(FALSE)
+  }
+  asgn_id <- pd$parent[r_def]
+  current <- asgn_id
+  for (hop in 1:2) {
+    r_cur <- arch_row_of(nav, current)
+    if (is.na(r_cur)) {
+      return(FALSE)
+    }
+    if (pd$parent[r_cur] == 0L) {
+      holder_tokens <- pd$token[arch_children(nav, pd$id[r_cur])]
+      return(!any(holder_tokens %in% c("IF", "WHILE", "FOR")))
+    }
+    current <- pd$parent[r_cur]
+  }
+  FALSE
 }
 
 arch_definition_name <- function(def_id, nav) {
