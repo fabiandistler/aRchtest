@@ -1,5 +1,5 @@
 arch_resolved_methods <- c(
-  "namespace", "namespace_internal", "local", "export", "base"
+  "namespace", "namespace_internal", "local", "export", "base", "value"
 )
 arch_package_methods <- c("namespace", "namespace_internal", "export", "base")
 
@@ -30,6 +30,17 @@ arch_package_methods <- c("namespace", "namespace_internal", "export", "base")
 #' of what it saw proves little, and a degraded pass looks exactly like a clean
 #' project unless you look.
 #'
+#' # Resolving function values
+#'
+#' A bare name passed to a call as an argument (`lapply(x, helper)`,
+#' `Filter(f, x)`, `formals(load_sales)`) is a dependency when it is not a
+#' variable of that scope. Such a site resolves as `"value"` when the name is
+#' defined by the project at top level; it is then attributable exactly like a
+#' call and counts in `must_not_depend_on()`. Passing a base or imported
+#' function by value (`lapply(x, sum)`) produces no edge, and looking a
+#' run-time function up dynamically (`do.call()`, `get()`, `match.fun()`)
+#' remains out of scope.
+#'
 #' @param rules A single `arch_rule` or a list of them. Rule names must be
 #'   unique, so every finding stays attributable to the rule that produced it.
 #' @param root Path to the project root to analyse, used as given. By default
@@ -54,7 +65,9 @@ arch_package_methods <- c("namespace", "namespace_internal", "export", "base")
 #'   * `rules` -- one row per rule, with the number of files it selected,
 #'     whether its selector matched nothing, and how many violations it found.
 #'   * `selected_files` -- per rule, the files its selector matched.
-#'   * `counts` -- call sites seen, resolved, ambiguous and unresolved.
+#'   * `counts` -- call sites seen, resolved, ambiguous and unresolved. Value
+#'     passes of project functions are included in the seen and resolved
+#'     counts, so the numbers cover more than call syntax.
 #'   * `files_parsed`, `skipped_files` -- parse coverage.
 #'   * `declared_dependencies`, `unavailable_dependencies` -- resolution inputs.
 #'   * `root`, `is_package`, `on_ambiguous` -- how the check was scoped.
@@ -236,15 +249,24 @@ arch_analyse <- function(root) {
     )
   )
   nested_index <- arch_nested_index(nested_all)
+  value_uses <- data.table::rbindlist(
+    c(
+      list(arch_empty_calls()),
+      lapply(usable, function(p) p$value_uses)
+    )
+  )
+  local_index <- arch_local_index(defs)
 
   list(
     project = project,
-    sites = arch_resolve(
-      calls,
-      arch_local_index(defs),
-      declared_index$index,
-      base_index$index,
-      nested_index
+    sites = data.table::rbindlist(
+      list(
+        arch_resolve(
+          calls, local_index, declared_index$index, base_index$index,
+          nested_index
+        ),
+        arch_value_sites(unique(value_uses), local_index)
+      )
     ),
     skipped = skipped,
     files_parsed = sum(ok),
@@ -391,7 +413,11 @@ arch_match_must_not_depend_on <- function(scoped, constraint, files) {
     })
   )
 
-  violation <- scoped$resolved_by == "local" &
+  # `local` and `value` both attribute a dependency edge to a project file:
+  # the former for a call to a project function, the latter for a project
+  # function passed as a value (lapply(x, helper)). A value pass is a real
+  # dependency even though the function is never called by name.
+  violation <- scoped$resolved_by %in% c("local", "value") &
     scoped$owner %in% forbidden &
     scoped$owner != scoped$file
 

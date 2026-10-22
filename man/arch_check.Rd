@@ -35,7 +35,9 @@ empty but has the same columns and types, never \code{NULL}.
 \item \code{rules} -- one row per rule, with the number of files it selected,
 whether its selector matched nothing, and how many violations it found.
 \item \code{selected_files} -- per rule, the files its selector matched.
-\item \code{counts} -- call sites seen, resolved, ambiguous and unresolved.
+\item \code{counts} -- call sites seen, resolved, ambiguous and unresolved. Value
+passes of project functions are included in the seen and resolved
+counts, so the numbers cover more than call syntax.
 \item \code{files_parsed}, \code{skipped_files} -- parse coverage.
 \item \code{declared_dependencies}, \code{unavailable_dependencies} -- resolution inputs.
 \item \code{root}, \code{is_package}, \code{on_ambiguous} -- how the check was scoped.
@@ -66,6 +68,17 @@ unresolved bucket and the package is listed in \code{unavailable_dependencies}.
 Read \code{counts} before trusting a clean result. A check that resolved little
 of what it saw proves little, and a degraded pass looks exactly like a clean
 project unless you look.
+}
+
+\section{Resolving function values}{
+A bare name passed to a call as an argument (\code{lapply(x, helper)},
+\code{Filter(f, x)}, \code{formals(load_sales)}) is a dependency when it is not a
+variable of that scope. Such a site resolves as \code{"value"} when the name is
+defined by the project at top level; it is then attributable exactly like a
+call and counts in \code{must_not_depend_on()}. Passing a base or imported
+function by value (\code{lapply(x, sum)}) produces no edge, and looking a
+run-time function up dynamically (\code{do.call()}, \code{get()}, \code{match.fun()})
+remains out of scope.
 }
 
 \examples{

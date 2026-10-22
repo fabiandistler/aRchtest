@@ -1,5 +1,11 @@
 # aRchtest (development version)
 
+* `must_not_depend_on()` now detects project functions that are passed as
+  values: `lapply(x, helper)`, `purrr::map(x, helper)`, `Reduce(helper, x)`,
+  `formals(helper)` and `Filter(helper, x)` create a dependency edge to the
+  module that defines `helper`, reported with `resolved_by = "value"`. A name
+  that a local binding shadows stays out of the graph, and a base or imported
+  function passed by value is not tracked (#21).
 * A rule without a selector is now rejected when it is checked, with the same
   "needs a selector first" wording the DSL uses when a constraint or an
   exclusion is added. Such a rule selects no file and can never produce a

@@ -73,6 +73,60 @@ arch_nested_owner <- function(index, file, scope, symbol) {
   if (is.na(nested_file)) NA_character_ else nested_file
 }
 
+arch_empty_value_sites <- function() {
+  data.table::data.table(
+    file = character(),
+    line = integer(),
+    column = integer(),
+    enclosing_function = character(),
+    callee = character(),
+    symbol = character(),
+    package = character(),
+    internal = logical(),
+    dynamic = logical(),
+    source_text = character(),
+    owner = character(),
+    resolved_by = character(),
+    candidates = list()
+  )
+}
+
+# A bare name passed as a value to a call is a dependency only when the
+# project defines the name at top level; otherwise it is an ordinary variable
+# read (a base function or an undeclared identifier) and produces no edge.
+# Values resolve against the top-level definition index under the same owner
+# rule as calls and are tagged distinctly so they stay visible in the output.
+arch_value_sites <- function(value_uses, local_index) {
+  if (!nrow(value_uses)) {
+    return(arch_empty_value_sites())
+  }
+  keep <- vapply(
+    value_uses$symbol,
+    function(nm) length(arch_lookup(local_index, nm)) > 0L,
+    logical(1)
+  )
+  if (!any(keep)) {
+    return(arch_empty_value_sites())
+  }
+  kept <- value_uses[which(keep)]
+  n <- nrow(kept)
+  owner <- vapply(
+    seq_len(n),
+    function(i) {
+      look <- arch_lookup(local_index, kept$symbol[i])
+      arch_local_owner(look, kept$file[i])
+    },
+    character(1)
+  )
+  sites <- kept
+  sites$owner <- owner
+  sites$resolved_by <- rep("value", n)
+  # An all-NULL list column looks like a NULL assignment to data.table's
+  # $<- and would vanish instead of being created; empty vectors survive.
+  sites$candidates <- lapply(seq_len(n), function(i) character())
+  sites
+}
+
 arch_resolve <- function(
   calls, local_index, declared_index, base_index, nested_index
 ) {
