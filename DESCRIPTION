@@ -1,6 +1,6 @@
 Package: aRchtest
 Title: Declare and Enforce Architectural Rules in 'testthat'
-Version: 0.1.0
+Version: 0.2.0
 Authors@R:
     person("Fabian", "Distler", , "fdistlermpi@gmail.com", role = c("aut", "cre"))
 Description: Declare architectural boundaries between the modules of an R
